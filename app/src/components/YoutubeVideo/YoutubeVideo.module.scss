@@ -1,0 +1,11 @@
+.videoContainer {
+  display: flex;
+  width: 100%;
+  aspect-ratio: 16/9;
+}
+
+.youtubeVideo iframe {
+  border-radius: var(--border-radius);
+  height: 100%;
+  aspect-ratio: 16/9;
+}

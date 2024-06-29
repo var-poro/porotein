@@ -1,0 +1,25 @@
+.container {
+  height: 100%;
+  display: flex;
+}
+
+.programForm {
+  height: 100%;
+}
+
+.programForm form {
+  h1 {
+    max-width: 60vw;
+    margin-bottom: Var(--spacing);
+  }
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+
+  .formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing) / 2);
+  }
+}

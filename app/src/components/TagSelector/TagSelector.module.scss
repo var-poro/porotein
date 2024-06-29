@@ -1,0 +1,18 @@
+.tagSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing) / 2);
+}
+
+.tag {
+  font-size: .9rem;
+  border-radius: var(--border-radius);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+}
+
+.tag.selected {
+  background-color: var(--text-color);
+  color: white;
+}

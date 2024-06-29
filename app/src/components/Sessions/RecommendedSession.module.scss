@@ -1,0 +1,32 @@
+.recommendedSession {
+  padding: var(--spacing);
+  border-radius: var(--border-radius);
+  background-color: var(--background-color);
+  border: 1px solid var(--text-color);
+
+  p {
+    font-size: var(--font-size);
+  }
+
+  .sessionDetailsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
+  .startSession {
+    display: flex;
+    gap: calc(var(--spacing) / 2);
+    align-items: center;
+    margin-left: 0;
+
+    svg {
+      transform: rotate(90deg);
+    }
+  }
+}

@@ -1,0 +1,62 @@
+@import './variables';
+
+html {
+
+  * {
+    box-sizing: border-box;
+    max-width: 600px;
+  }
+}
+
+body {
+  position: relative;
+  font-size: 16px;
+  margin: auto;
+  border-radius: var(--border-radius);
+  width: 100svw;
+  overflow-x: hidden;
+  padding: var(--spacing);
+  padding-bottom: 8rem;
+  background-color: #ffffff;
+  min-height: 100svh;
+
+  #root {
+    height: calc(100% - 5rem);
+    width: 100%;
+  }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-color);
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: var(--text-color);
+}
+
+button {
+  //font-size: 1rem;
+  margin: 0 auto;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: var(--border-radius);
+  padding: calc(var(--spacing) / 2) var(--spacing);
+  color: #fff;
+  cursor: pointer;
+}
+
+input, textarea, select {
+  width: 100%;
+  font-size: 1rem;
+  font-family: var(--font-family), sans-serif;
+  color: var(--text-color);
+  border: none;
+  outline: none;
+  line-height: 1;
+  vertical-align: middle;
+  border-radius: var(--border-radius);
+  padding: calc(var(--spacing) / 1);
+  background-color: var(--background-color);
+}

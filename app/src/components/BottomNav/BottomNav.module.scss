@@ -1,0 +1,37 @@
+.bottomNav {
+  display: flex;
+  z-index: 10;
+  margin: auto;
+  align-items: center;
+  justify-content: space-evenly;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  background-color: var(--background-color);
+  overflow: hidden;
+
+  a {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing) 0;
+
+  }
+
+  .active {
+    backdrop-filter: brightness(.98);
+
+    svg {
+      color: var(--primary-color);
+    }
+  }
+
+  svg {
+    width: 2rem;
+    height: 2rem;
+    color: var(--text-color);
+  }
+}

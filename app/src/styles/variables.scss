@@ -1,0 +1,36 @@
+$primary-color: #000000;
+$secondary-color: #2ecc71;
+$border-radius: var(--border-radius);
+$font-family: 'Arial, sans-serif';
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Prata&display=swap');
+
+:root {
+  --font-family: 'Poppins';
+  --header-font-family: 'Prata';
+  --primary-color: #1a85ff;
+  --border-radius: 12px;
+  --secondary-color: #2ecc71;
+  --text-color: #000000;
+  --delete-color: #ff5050;
+  --background-color: #eeeff1;
+  --spacing: 1rem;
+  --box-shadow: 0 0 2px 4px #efefef;
+}
+
+h1, h2, h3 {
+  font-family: var(--header-font-family), serif;
+  font-variation-settings: "wght" 475;
+}
+
+h4, h5, h6, p, span, button, a, label, small {
+  font-family: var(--font-family), sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}

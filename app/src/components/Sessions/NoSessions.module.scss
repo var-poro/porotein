@@ -1,0 +1,29 @@
+.noSessions {
+  font-size: .8rem;
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--spacing);
+  height: 85svh;
+  justify-content: center;
+}
+
+.logo {
+  width: 10rem;
+  height: 8rem;
+  margin: 0 auto;
+}
+
+.noSessionsButtonsContainer {
+  display: flex;
+  gap: var(--spacing);
+  align-items: center;
+
+  * {
+    white-space: pre;
+  }
+
+  button {
+    font-size: .8rem;
+    margin: 0;
+  }
+}
