@@ -1,0 +1,60 @@
+.activeExercice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+  margin-top: var(--spacing);
+}
+
+.tagsContainer {
+  display: flex;
+  gap: var(--spacing);
+}
+
+.tag {
+  padding: calc(var(--spacing) / 2) var(--spacing);
+  background-color: var(--background-color);
+  border-radius: var(--border-radius);
+  font-family: "Anek Gurmukhi", Sans-serif;
+}
+
+.repSetDataContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing);
+  margin-right: auto;
+
+  input {
+    max-width: 8rem;
+  }
+}
+
+.weightInput {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+
+  small {
+    background-color: var(--background-color);
+    padding: var(--spacing);
+    pointer-events: none;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+  }
+}
+
+.header {
+  display: flex;
+  gap: calc(var(--spacing) / 2);
+  align-items: baseline;
+}
+
+.buttonsContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing);
+
+  button {
+    margin: 0;
+  }
+}

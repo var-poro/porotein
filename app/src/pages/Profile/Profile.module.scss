@@ -1,0 +1,19 @@
+.profileForm {
+  margin-bottom: 20px;
+
+  .formGroup {
+    margin-bottom: 15px;
+
+  }
+
+  .buttonsContainer {
+    button {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    display: flex;
+    gap: var(--spacing);
+  }
+}
+

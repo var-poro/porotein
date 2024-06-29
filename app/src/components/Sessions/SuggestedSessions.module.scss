@@ -1,0 +1,35 @@
+.sessionCard {
+  width: 100%;
+  border: 1px solid var(--background-color);
+  padding: calc(var(--spacing) / 2);
+  border-radius: var(--border-radius);
+
+  .sessionDetails {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .sessionDetailsHeader {
+    display: flex;
+    gap: calc(var(--spacing) / 4);
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: .75rem;
+      height: .75rem;
+    }
+  }
+}
+
+.suggestedSessions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+
+  button {
+    background-color: var(--background-color);
+    color: var(--text-color);
+  }
+}

@@ -1,0 +1,84 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+  height: 100%;
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing);
+  }
+
+  textarea {
+    min-height: 10rem;
+  }
+}
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--spacing);
+  gap: calc(var(--spacing) / 2);
+}
+
+.exercisesContainer {
+  margin-top: var(--spacing);
+}
+
+.exercisesList {
+  display: flex;
+  flex-direction: column;
+  margin-top: calc(var(--spacing) / 2);
+  gap: calc(var(--spacing) / 2);
+  overflow: auto;
+  max-height: 18rem;
+
+
+}
+
+.exercise {
+  display: flex;
+  justify-content: space-between;
+
+  span {
+    width: 100%;
+    max-width: 50vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  button {
+    margin-right: 0;
+    color: var(--text-color);
+    background-color: var(--background-color);
+  }
+
+  .exerciseText {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing);
+    cursor: pointer;
+
+  }
+
+  .exerciseIcon {
+    display: flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--spacing) / 3);
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+  }
+}
+
+.buttonsContainer {
+  display: flex;
+  gap: var(--spacing);
+
+  button {
+    margin: 0;
+  }
+}
