@@ -17,6 +17,9 @@ type Props = {
 const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
   const [repSetIsDone, setRepSetIsDone] = useState<boolean>(false);
   const [currentSeriesIndex, setCurrentSeriesIndex] = useState<number>(0);
+  const [repetitions, setRepetitions] = useState<number>(0);
+  const [weight, setWeight] = useState<number>(0);
+
   const { data: muscles, isLoading: isMusclesLoading } = useQuery(
     'muscles',
     async () => {
@@ -44,6 +47,13 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
   useEffect(() => {
     setCurrentSeriesIndex(0);
   }, [exercise]);
+
+  useEffect(() => {
+    if (exercise.repSets?.[currentSeriesIndex]) {
+      setRepetitions(exercise.repSets[currentSeriesIndex].repetitions);
+      setWeight(exercise.repSets[currentSeriesIndex].weight);
+    }
+  }, [currentSeriesIndex, exercise.repSets]);
 
   if (isMusclesLoading || isTagsLoading) return <Loading />;
 
@@ -86,24 +96,22 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
       {exercise.repSets?.[currentSeriesIndex] && (
         <>
           {!repSetIsDone ? (
-            <>
-              <div className={styles.repSetDataContainer}>
+            <div className={styles.repSetDataContainer}>
+              <input
+                type="number"
+                value={repetitions}
+                onChange={(e) => setRepetitions(Number(e.target.value))}
+              />
+              <span>x</span>
+              <div className={styles.weightInput}>
                 <input
                   type="number"
-                  defaultValue={
-                    exercise.repSets?.[currentSeriesIndex].repetitions
-                  }
+                  value={weight}
+                  onChange={(e) => setWeight(Number(e.target.value))}
                 />
-                <span>x</span>
-                <div className={styles.weightInput}>
-                  <input
-                    type="number"
-                    defaultValue={exercise.repSets?.[currentSeriesIndex].weight}
-                  />
-                  <small>kg</small>
-                </div>
+                <small>kg</small>
               </div>
-            </>
+            </div>
           ) : (
             <Timer
               defaultValue={exercise.repSets?.[currentSeriesIndex].restTime}
