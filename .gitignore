@@ -1,3 +1,4 @@
 /api/dist/
 /app/dist/
 /.idea
+.env
