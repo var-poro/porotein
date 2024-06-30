@@ -21,17 +21,30 @@ jobs:
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no deploy@195.200.15.145 << 'EOF'
-            cd /var/www/porotein
-            git pull
-          
-            cd /var/www/porotein/app
-            pnpm install
-            pnpm build
-          
-            cd /var/www/porotein/api
-            pnpm install
-            pnpm build
+          # Charger nvm
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
-            pm2 restart api
-            sudo systemctl reload nginx
-          EOF
+          # Utiliser la version de Node.js gérée par nvm
+          nvm use node
+
+          # Vérifier que pnpm et pm2 sont disponibles
+          which pnpm
+          which pm2
+
+          cd /var/www/porotein
+          git pull
+
+          cd /var/www/porotein/app
+          pnpm install
+          pnpm build
+
+          cd /var/www/porotein/api
+          pnpm install
+          pnpm build
+
+          pm2 start ecosystem.config.js --env production
+
+          # Vérification de l'état des processus PM2
+          pm2 statu
