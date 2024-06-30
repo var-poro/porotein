@@ -19,7 +19,7 @@ const TagManager = () => {
   const { data: tags, isLoading } = useQuery('tags', fetchTags);
 
   const createTagMutation = useMutation(
-    (newTag) => apiClient.post('/tags', { name: newTag }),
+    (newTag: string) => apiClient.post('/tags', { name: newTag }),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('tags');
