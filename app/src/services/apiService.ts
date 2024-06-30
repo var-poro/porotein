@@ -3,7 +3,7 @@ import { getToken, removeToken, setToken } from '@/utils/tokenUtils';
 import { refreshAccessToken } from './authService';
 
 const apiClient = axios.create({
-  baseURL: 'http://192.168.1.67:4000/',
+  baseURL: 'http://localhost:4000/',
   withCredentials: true,
 });
 
