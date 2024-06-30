@@ -12,6 +12,7 @@ import notificationRoutes from './routes/notificationRoutes';
 import authRoutes from './routes/authRoutes';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import path from "node:path";
 
 dotenv.config();
 
@@ -20,8 +21,8 @@ const PORT = process.env.PORT || 4000;
 
 // Middleware CORS
 const corsOptions = {
-  origin: ['http://192.168.1.10:5173', 'http://localhost:5173'],
-  credentials: true,
+    origin: ['http://192.168.1.10:5173', 'http://localhost:5173'],
+    credentials: true,
 };
 app.use(cors(corsOptions));
 
@@ -29,7 +30,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Middleware pour analyser les corps de requêtes URL-encodées
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 // Middleware pour parser les cookies
 app.use(cookieParser());
@@ -38,6 +39,10 @@ app.use(cookieParser());
 connectDB();
 
 // Routes
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/programs', programRoutes);
@@ -49,5 +54,5 @@ app.use('/notifications', notificationRoutes);
 app.use('/supplements', supplementRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
