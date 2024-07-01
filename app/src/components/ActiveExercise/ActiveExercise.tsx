@@ -59,6 +59,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
 
   return (
     <div className={styles.activeExercice}>
+      <h3>{exercise.name}</h3>
       <span>{exercise.description}</span>
       {exercise.videoUrl && <YoutubeVideo youtubeUrl={exercise.videoUrl} />}
       <div className={styles.tagsContainer}>
