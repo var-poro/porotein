@@ -98,14 +98,14 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
           {!repSetIsDone ? (
             <div className={styles.repSetDataContainer}>
               <input
-                type="number"
+                type="tel"
                 value={repetitions}
                 onChange={(e) => setRepetitions(Number(e.target.value))}
               />
               <span>x</span>
               <div className={styles.weightInput}>
                 <input
-                  type="number"
+                  type="tel"
                   value={weight}
                   onChange={(e) => setWeight(Number(e.target.value))}
                 />

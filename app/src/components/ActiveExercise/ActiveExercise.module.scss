@@ -7,10 +7,12 @@
 
 .tagsContainer {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--spacing);
 }
 
 .tag {
+  white-space: pre;
   padding: calc(var(--spacing) / 2) var(--spacing);
   background-color: var(--background-color);
   border-radius: var(--border-radius);
