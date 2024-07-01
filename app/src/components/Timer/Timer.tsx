@@ -9,32 +9,47 @@ type Props = {
 
 const Timer: FC<Props> = ({ defaultValue }) => {
   const [seconds, setSeconds] = useState(defaultValue);
-  const [isRunning, setIsRunning] = useState(false);
+  const [isRunning, setIsRunning] = useState(true); // Start running by default
+  const [startTime, setStartTime] = useState<Date | null>(null);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
+
     if (isRunning) {
+      const now = new Date();
+      if (!startTime) {
+        setStartTime(now);
+      }
+
       interval = setInterval(() => {
-        setSeconds((prevSeconds) => {
-          if (prevSeconds === 1) {
-            clearInterval(interval);
-            setIsRunning(false);
-            return 0;
-          }
-          return prevSeconds - 1;
-        });
+        const elapsedTime = Math.floor(
+          (new Date().getTime() - (startTime?.getTime() || now.getTime())) /
+            1000
+        );
+        const remainingTime = defaultValue - elapsedTime;
+
+        if (remainingTime <= 0) {
+          clearInterval(interval);
+          setIsRunning(false);
+          setSeconds(0);
+        } else {
+          setSeconds(remainingTime);
+        }
       }, 1000);
+
       setIntervalId(interval);
     } else if (intervalId) {
       clearInterval(intervalId);
     }
+
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, startTime, defaultValue]);
 
   const handleStart = () => {
     if (!isRunning) {
       setIsRunning(true);
+      setStartTime(new Date());
     }
   };
 
@@ -47,17 +62,25 @@ const Timer: FC<Props> = ({ defaultValue }) => {
   const handleReset = () => {
     setIsRunning(false);
     setSeconds(defaultValue);
+    setStartTime(null);
   };
 
-  const formatTime = (totalSeconds: number) => {
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  const convertSecondsToTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, '0');
+    const secs = (seconds % 60).toString().padStart(2, '0');
+    return `${mins}:${secs}`;
   };
 
   const handleInputChange = (value: string) => {
-    const [mins, secs] = value.split(':').map(Number);
-    setSeconds(mins * 60 + (secs || 0));
+    const [minutes, seconds] = value.split(':').map(Number);
+    setSeconds(minutes * 60 + (seconds || 0));
+  };
+
+  const handleTimeInputChange = (value: string) => {
+    const [minutes, seconds] = value.split(':').map(Number);
+    setSeconds(minutes * 60 + (seconds || 0));
   };
 
   return (
@@ -66,12 +89,24 @@ const Timer: FC<Props> = ({ defaultValue }) => {
         <span>Temps de repos</span>
         <br />
         <div className={styles.timer}>
-          <input
-            type="text"
-            value={formatTime(seconds)}
-            onChange={(e) => handleInputChange(e.target.value)}
-            disabled={isRunning}
-          />
+          <div className={styles.timeInputWrapper}>
+            <input
+              type="text"
+              value={convertSecondsToTime(seconds)}
+              onChange={(e) => handleInputChange(e.target.value)}
+              disabled={isRunning}
+              className={styles.timeDisplay}
+            />
+            <input
+              type="time"
+              onChange={(e) => handleTimeInputChange(e.target.value)}
+              className={styles.timePicker}
+              min={'00:00'}
+              max={'59:59'}
+              pattern="[0-9]{2}:[0-9]{2}"
+              step={1}
+            />
+          </div>
           <div className={styles.buttonsContainer}>
             {!isRunning ? (
               <span onClick={handleStart}>
