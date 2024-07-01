@@ -56,7 +56,6 @@ const ActiveSession = () => {
     <div className={styles.container}>
       <div className={styles.headerContainer}>
         <h5>{sessionData.name}</h5>
-        <h3>{sessionData.exercises[exerciseIndex].name}</h3>
         <h5>
           {exerciseIndex + 1} / {sessionData.exercises.length}
         </h5>
