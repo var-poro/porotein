@@ -27,7 +27,7 @@ const Timer: FC<Props> = ({ defaultValue }) => {
           (new Date().getTime() - (startTime?.getTime() || now.getTime())) /
             1000
         );
-        const remainingTime = defaultValue - elapsedTime;
+        const remainingTime = seconds - elapsedTime;
 
         if (remainingTime <= 0) {
           clearInterval(interval);
@@ -44,7 +44,7 @@ const Timer: FC<Props> = ({ defaultValue }) => {
     }
 
     return () => clearInterval(interval);
-  }, [isRunning, startTime, defaultValue]);
+  }, [isRunning, startTime]);
 
   const handleStart = () => {
     if (!isRunning) {
@@ -75,12 +75,16 @@ const Timer: FC<Props> = ({ defaultValue }) => {
 
   const handleInputChange = (value: string) => {
     const [minutes, seconds] = value.split(':').map(Number);
-    setSeconds(minutes * 60 + (seconds || 0));
+    const totalSeconds = minutes * 60 + (seconds || 0);
+    setSeconds(totalSeconds);
+    setStartTime(new Date());
   };
 
   const handleTimeInputChange = (value: string) => {
     const [minutes, seconds] = value.split(':').map(Number);
-    setSeconds(minutes * 60 + (seconds || 0));
+    const totalSeconds = minutes * 60 + (seconds || 0);
+    setSeconds(totalSeconds);
+    setStartTime(new Date());
   };
 
   return (
@@ -99,6 +103,7 @@ const Timer: FC<Props> = ({ defaultValue }) => {
             />
             <input
               type="time"
+              value={convertSecondsToTime(defaultValue)}
               onChange={(e) => handleTimeInputChange(e.target.value)}
               className={styles.timePicker}
               min={'00:00'}
