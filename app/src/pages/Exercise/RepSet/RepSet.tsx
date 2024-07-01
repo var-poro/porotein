@@ -27,7 +27,10 @@ const RepSetForm = () => {
 
   const [repetitions, setRepetitions] = useState(1);
   const [weight, setWeight] = useState(1);
-  const [restTime, setRestTime] = useState(90);
+  const [restTime, setRestTime] = useState('00:01:30');
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
+
   const { data: repSet, isLoading: isRepSetLoading } = useQuery(
     ['repSet', repSetId],
     () => getRepSetById(exerciseId!, repSetId!),
@@ -38,9 +41,50 @@ const RepSetForm = () => {
     if (repSet) {
       setRepetitions(repSet.repetitions);
       setWeight(repSet.weight);
-      setRestTime(repSet.restTime);
+      setRestTime(convertSecondsToTime(repSet.restTime));
     }
   }, [repSet]);
+
+  const convertTimeToSeconds = (time: string) => {
+    const [minutes, seconds] = time.split(':').map(Number);
+    return minutes * 60 + (seconds || 0);
+  };
+
+  const convertSecondsToTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, '0');
+    const secs = (seconds % 60).toString().padStart(2, '0');
+    return `${mins}:${secs}`;
+  };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRunning) {
+      const now = new Date();
+      if (!startTime) {
+        setStartTime(now);
+      }
+
+      interval = setInterval(() => {
+        const elapsedTime = Math.floor(
+          (new Date().getTime() - (startTime?.getTime() || now.getTime())) /
+            1000
+        );
+        const remainingTime = convertTimeToSeconds(restTime) - elapsedTime;
+
+        if (remainingTime <= 0) {
+          clearInterval(interval);
+          setIsRunning(false);
+          setRestTime(convertSecondsToTime(0));
+        } else {
+          setRestTime(convertSecondsToTime(remainingTime));
+        }
+      }, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [isRunning, startTime, restTime]);
 
   const createRepSetMutation = useMutation(
     (newRepSet: RepSet) => createRepSet(exerciseId!, newRepSet),
@@ -77,7 +121,7 @@ const RepSetForm = () => {
     const repSetData: Omit<RepSet, '_id'> = {
       repetitions,
       weight,
-      restTime,
+      restTime: convertTimeToSeconds(restTime),
     };
 
     if (isEditMode) {
@@ -113,7 +157,7 @@ const RepSetForm = () => {
                   Répétitions <GiWeightLiftingUp />
                 </label>
                 <input
-                  type="number"
+                  type="tel"
                   value={repetitions}
                   onChange={(e) => setRepetitions(parseInt(e.target.value))}
                   min={1}
@@ -126,7 +170,7 @@ const RepSetForm = () => {
                 </label>
                 <div className={styles.weightInput}>
                   <input
-                    type="number"
+                    type="tel"
                     value={weight}
                     onChange={(e) => setWeight(parseInt(e.target.value))}
                     min={0}
@@ -139,12 +183,23 @@ const RepSetForm = () => {
               <label>
                 Temps de repos <MdOutlineTimer />
               </label>
-              <input
-                type="number"
-                value={restTime}
-                onChange={(e) => setRestTime(parseInt(e.target.value))}
-                min={0}
-              />
+              <div className={styles.timeInputWrapper}>
+                <input
+                  type="text"
+                  value={restTime}
+                  onChange={(e) => setRestTime(e.target.value)}
+                  className={styles.timeDisplay}
+                />
+                <input
+                  type="time"
+                  onChange={(e) => setRestTime(e.target.value)}
+                  className={styles.timePicker}
+                  min={'00:00'}
+                  max={'59:59'}
+                  pattern="[0-9]{2}:[0-9]{2}"
+                  step={1}
+                />
+              </div>
             </div>
           </div>
           <div className={styles.buttonsContainer}>
