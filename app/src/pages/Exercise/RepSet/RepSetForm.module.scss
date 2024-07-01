@@ -63,3 +63,26 @@
   display: flex;
   gap: var(--spacing);
 }
+
+
+.timerContainer {
+  position: relative;
+}
+
+.timeInputWrapper {
+  position: relative;
+}
+
+.timeDisplay {
+  width: 100px;
+  text-align: center;
+}
+
+.timePicker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  width: 100px;
+  height: 100%;
+}
