@@ -1,62 +1,139 @@
-.activeExercice {
+.activeExercise {
   display: flex;
   flex-direction: column;
   gap: var(--spacing);
   margin-top: var(--spacing);
-}
-
-.tagsContainer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing);
-}
-
-.tag {
-  white-space: pre;
-  padding: calc(var(--spacing) / 2) var(--spacing);
-  background-color: var(--background-color);
-  border-radius: var(--border-radius);
-  font-family: "Anek Gurmukhi", Sans-serif;
-}
-
-.repSetDataContainer {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing);
-  margin-right: auto;
-
-  input {
-    max-width: 8rem;
-  }
-}
-
-.weightInput {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--border-radius);
-
-  small {
-    background-color: var(--background-color);
-    padding: var(--spacing);
-    pointer-events: none;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-  }
-}
-
-.header {
-  display: flex;
-  gap: calc(var(--spacing) / 2);
-  align-items: baseline;
-}
-
-.buttonsContainer {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing);
 
   button {
-    margin: 0;
+    font-size: 1rem;
+  }
+
+  .exerciseHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+
+    svg {
+      transition: 200ms;
+    }
+
+    h3 {
+      margin: 0;
+    }
+
+    span {
+      font-size: 1.5rem;
+    }
+  }
+
+  .collapsedIcon {
+    transform: rotate(-90deg);
+  }
+
+  .collapsed {
+    margin-bottom: calc(var(--spacing) * -1);
+  }
+
+  .exercise {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+    overflow: hidden;
+    transition: height 0.3s ease-in-out;
+  }
+
+  .tagsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing);
+  }
+
+  .tag {
+    white-space: pre;
+    padding: calc(var(--spacing) / 2) var(--spacing);
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    font-family: "Anek Gurmukhi", sans-serif;
+  }
+
+  .repSetDataContainer {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing);
+    margin-right: auto;
+    justify-content: center;
+
+    input {
+      text-align: center;
+      font-size: 4rem;
+      width: 40vw;
+      max-width: 17rem;
+      height: 8rem;
+
+      small {
+        top: 0;
+      }
+    }
+  }
+
+  .editInputContainer {
+    display: flex;
+    margin-top: var(--spacing);
+    gap: var(--spacing);
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      user-select: none;
+      -webkit-user-select: none;
+      border-radius: 50%;
+      padding: calc(var(--spacing) / 2);
+      background: var(--background-color);
+      width: 3rem;
+      height: 3rem;
+    }
+  }
+
+  .times {
+    margin-top: -3.5rem;
+  }
+
+  .weightInput {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+
+    small {
+      background-color: var(--background-color);
+      padding: var(--spacing);
+      pointer-events: none;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+    }
+  }
+
+  .header {
+    display: flex;
+    gap: calc(var(--spacing) / 2);
+    align-items: baseline;
+  }
+
+  .buttonsContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing);
+    margin-top: 2rem;
+
+    * {
+      font-size: 1rem;
+    }
+
+    button {
+      margin: 0;
+    }
   }
 }

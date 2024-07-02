@@ -34,7 +34,11 @@ const ActiveSession = () => {
   };
 
   const handleNextExercise = () => {
-    handleProgress(exerciseIndex + 1);
+    if (exerciseIndex + 1 < sessionData.exercises.length) {
+      handleProgress(exerciseIndex + 1);
+    } else {
+      navigate('/');
+    }
   };
 
   if (sessionLoading) return <Loading />;
@@ -71,9 +75,6 @@ const ActiveSession = () => {
           nextExercise={handleNextExercise}
         />
       }
-      {exerciseIndex > sessionData.exercises.length - 1 && (
-        <button onClick={() => navigate('/')}>Terminer la séance</button>
-      )}
     </div>
   );
 };
