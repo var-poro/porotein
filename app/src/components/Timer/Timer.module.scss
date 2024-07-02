@@ -3,10 +3,10 @@
   flex-direction: column;
 
   input {
-    font-size: 2rem;
-    font-family: "Kalnia", Serif;
+    font-size: 5rem;
+    font-family: "Kalnia", serif;
     text-align: center;
-    width: 7rem;
+    width: 90vw;
   }
 
   .timer {
@@ -22,6 +22,7 @@
   align-items: center;
   gap: var(--spacing);
   margin: 1rem 0;
+  font-size: 2rem;
 
   button {
     margin: 0;
@@ -49,7 +50,7 @@
 }
 
 .timeDisplay {
-  width: 100px;
+  width: 90vw;
   text-align: center;
 }
 

@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import styles from './Timer.module.scss';
 import { PiPauseBold, PiTriangleBold } from 'react-icons/pi';
 import { GrPowerReset } from 'react-icons/gr';
+import { IoWaterOutline } from 'react-icons/io5';
 
 type Props = {
   defaultValue: number;
@@ -90,15 +91,17 @@ const Timer: FC<Props> = ({ defaultValue }) => {
   return (
     <div>
       <div className={styles.timerContainer}>
-        <span>Temps de repos</span>
-        <br />
         <div className={styles.timer}>
+          <small>
+            <IoWaterOutline /> C'est le moment idéal pour boire une gorgée
+            d'eau.
+          </small>
+          <br />
           <div className={styles.timeInputWrapper}>
             <input
               type="text"
               value={convertSecondsToTime(seconds)}
               onChange={(e) => handleInputChange(e.target.value)}
-              disabled={isRunning}
               className={styles.timeDisplay}
             />
             <input

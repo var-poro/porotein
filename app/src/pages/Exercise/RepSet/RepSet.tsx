@@ -137,6 +137,15 @@ const RepSetForm = () => {
     }
   };
 
+  const handleRestTimeChange = (value: string) => {
+    const timePattern = /^\d{2}:\d{2}$/;
+    if (timePattern.test(value)) {
+      setRestTime(value);
+    } else if (value === '') {
+      setRestTime('00:00:00'); // Utilisez une valeur par défaut si l'entrée est vide
+    }
+  };
+
   if (isRepSetLoading) {
     return <Loading />;
   }
@@ -159,7 +168,10 @@ const RepSetForm = () => {
                 <input
                   type="tel"
                   value={repetitions}
-                  onChange={(e) => setRepetitions(parseInt(e.target.value))}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    setRepetitions(isNaN(value) ? 1 : value); // Utilisez 1 si la valeur est NaN
+                  }}
                   min={1}
                 />
               </div>
@@ -172,7 +184,10 @@ const RepSetForm = () => {
                   <input
                     type="tel"
                     value={weight}
-                    onChange={(e) => setWeight(parseInt(e.target.value))}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      setWeight(isNaN(value) ? 0 : value); // Utilisez 0 si la valeur est NaN
+                    }}
                     min={0}
                   />
                   <small>kg</small>
@@ -187,12 +202,13 @@ const RepSetForm = () => {
                 <input
                   type="text"
                   value={restTime}
-                  onChange={(e) => setRestTime(e.target.value)}
+                  onChange={(e) => handleRestTimeChange(e.target.value)}
                   className={styles.timeDisplay}
                 />
                 <input
                   type="time"
-                  onChange={(e) => setRestTime(e.target.value)}
+                  value={restTime}
+                  onChange={(e) => handleRestTimeChange(e.target.value)}
                   className={styles.timePicker}
                   min={'00:00'}
                   max={'59:59'}
