@@ -2,33 +2,26 @@ import {Request, Response} from 'express';
 import Program from '../models/Program';
 import Session from '../models/Session';
 import User from "../models/User";
-import mongoose, {Schema} from "mongoose";
+import {Schema} from "mongoose";
 
 interface AuthRequest extends Request {
     userId?: string;
 }
 
 export const createProgram = async (req: AuthRequest, res: Response) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
         const program = new Program({...req.body, userId: req.userId});
-        const savedProgram = await program.save({session});
+        const savedProgram = await program.save();
 
-        const user = await User.findById(req.userId).session(session);
+        const user = await User.findById(req.userId);
 
         if (user && !user.activeProgram) {
             user.activeProgram = savedProgram._id as Schema.Types.ObjectId;
-            await user.save({session});
+            await user.save();
         }
 
-        await session.commitTransaction();
-        session.endSession();
         res.status(201).send(savedProgram);
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
         res.status(400).send({error: (error as Error).message});
     }
 };
