@@ -94,18 +94,18 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
           />
         </span>
       </div>
-      {!exerciseStarted && (
-        <div className={styles.buttonsContainer}>
-          <button onClick={handleStartExercise}>Démarrer</button>
-          <span onClick={nextExercise}>Passer l'exercice</span>
-        </div>
-      )}
       <div
         ref={exerciseRef}
         className={`${styles.exercise} ${isCollapsed ? styles.collapsed : ''}`}
       >
         <span>{exercise.description}</span>
         {exercise.videoUrl && <YoutubeVideo youtubeUrl={exercise.videoUrl} />}
+        {!exerciseStarted && (
+          <div className={styles.buttonsContainer}>
+            <button onClick={handleStartExercise}>Démarrer</button>
+            <span onClick={nextExercise}>Passer l'exercice</span>
+          </div>
+        )}
         <h5>Muscles</h5>
         <div className={styles.tagsContainer}>
           {muscles
