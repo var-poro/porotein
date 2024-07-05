@@ -94,6 +94,12 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
           />
         </span>
       </div>
+      {!exerciseStarted && (
+        <div className={styles.buttonsContainer}>
+          <button onClick={handleStartExercise}>Démarrer</button>
+          <span onClick={nextExercise}>Passer l'exercice</span>
+        </div>
+      )}
       <div
         ref={exerciseRef}
         className={`${styles.exercise} ${isCollapsed ? styles.collapsed : ''}`}
@@ -162,12 +168,6 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
             )}
           </div>
         </>
-      )}
-      {!exerciseStarted && (
-        <div className={styles.buttonsContainer}>
-          <button onClick={handleStartExercise}>Démarrer</button>
-          <span onClick={nextExercise}>Passer l'exercice</span>
-        </div>
       )}
     </div>
   );
