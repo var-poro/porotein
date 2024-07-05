@@ -8,7 +8,8 @@ import { Muscle } from '@/types/Muscle.ts';
 import { Tag } from '@/types/Tag.ts';
 import { Loading } from '@/components';
 import Timer from '@/components/Timer/Timer.tsx';
-import { BiChevronDown, BiMinus, BiPlus } from 'react-icons/bi';
+import { BiChevronDown } from 'react-icons/bi';
+import NumberInput from '@/components/NumberInput/NumberInput.tsx';
 
 type Props = {
   exercise: Exercise;
@@ -55,40 +56,6 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
-  };
-
-  const handleMouseDown = (callback: () => void) => {
-    callback();
-    const initialDelay = 500;
-    let intervalDelay = 200;
-    const intervalStep = 50;
-    const maxIntervalDelay = 50;
-    let timeoutId: NodeJS.Timeout;
-    let intervalId: NodeJS.Timeout;
-
-    const startInterval = () => {
-      intervalId = setInterval(() => {
-        callback();
-        if (intervalDelay > maxIntervalDelay) {
-          intervalDelay -= intervalStep;
-          clearInterval(intervalId);
-          startInterval();
-        }
-      }, intervalDelay);
-    };
-
-    timeoutId = setTimeout(() => {
-      startInterval();
-    }, initialDelay);
-
-    const clearTimers = () => {
-      clearTimeout(timeoutId);
-      clearInterval(intervalId);
-      intervalDelay = 200; // Réinitialiser l'intervalDelay après chaque relâchement
-    };
-
-    document.addEventListener('mouseup', clearTimers, { once: true });
-    document.addEventListener('touchend', clearTimers, { once: true });
   };
 
   useEffect(() => {
@@ -176,84 +143,9 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
             <>
               {!repSetIsDone ? (
                 <div className={styles.repSetDataContainer}>
-                  <div>
-                    <input
-                      type="tel"
-                      value={repetitions}
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value);
-                        setRepetitions(isNaN(value) ? 0 : value);
-                      }}
-                    />
-                    <div className={styles.editInputContainer}>
-                      <BiMinus
-                        onMouseDown={() =>
-                          handleMouseDown(() => {
-                            if (repetitions - 1 >= 0)
-                              setRepetitions((prev) => prev - 1);
-                          })
-                        }
-                        onTouchStart={() =>
-                          handleMouseDown(() => {
-                            if (repetitions - 1 >= 0)
-                              setRepetitions((prev) => prev - 1);
-                          })
-                        }
-                      />
-                      <BiPlus
-                        onMouseDown={() =>
-                          handleMouseDown(() => {
-                            setRepetitions((prev) => prev + 1);
-                          })
-                        }
-                        onTouchStart={() =>
-                          handleMouseDown(() => {
-                            setRepetitions((prev) => prev + 1);
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
+                  <NumberInput value={repetitions} setValue={setRepetitions} />
                   <span className={styles.times}>x</span>
-                  <div>
-                    <div className={styles.weightInput}>
-                      <input
-                        type="tel"
-                        value={weight}
-                        onChange={(e) => {
-                          const value = parseInt(e.target.value);
-                          setWeight(isNaN(value) ? 0 : value);
-                        }}
-                      />
-                      <small>kg</small>
-                    </div>
-                    <div className={styles.editInputContainer}>
-                      <BiMinus
-                        onMouseDown={() =>
-                          handleMouseDown(() => {
-                            if (weight - 1 >= 0) setWeight((prev) => prev - 1);
-                          })
-                        }
-                        onTouchStart={() =>
-                          handleMouseDown(() => {
-                            if (weight - 1 >= 0) setWeight((prev) => prev - 1);
-                          })
-                        }
-                      />
-                      <BiPlus
-                        onMouseDown={() =>
-                          handleMouseDown(() => {
-                            setWeight((prev) => prev + 1);
-                          })
-                        }
-                        onTouchStart={() =>
-                          handleMouseDown(() => {
-                            setWeight((prev) => prev + 1);
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
+                  <NumberInput value={weight} setValue={setWeight} />
                 </div>
               ) : (
                 <Timer
@@ -268,12 +160,14 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
             ) : (
               <button onClick={nextExercise}>Terminer l'exercice</button>
             )}
-            <small onClick={nextExercise}>Passer l'exercice</small>
           </div>
         </>
       )}
       {!exerciseStarted && (
-        <button onClick={handleStartExercise}>Démarrer l'exercice</button>
+        <div className={styles.buttonsContainer}>
+          <button onClick={handleStartExercise}>Démarrer</button>
+          <span onClick={nextExercise}>Passer l'exercice</span>
+        </div>
       )}
     </div>
   );
