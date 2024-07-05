@@ -1,0 +1,56 @@
+.repetitionsContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing);
+  margin-bottom: var(--spacing);
+
+  .inputContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing);
+
+    input {
+      text-align: center;
+      font-size: 4rem;
+      width: 40vw;
+      max-width: 17rem;
+      height: 8rem;
+
+      small {
+        top: 0;
+      }
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing);
+    }
+
+  }
+
+  .weightInput {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+
+    small {
+      padding: var(--spacing);
+      pointer-events: none;
+      position: absolute;
+      bottom: 4rem;
+      right: 0;
+    }
+  }
+
+  .times {
+    margin-top: -1.5rem;
+    font-size: var(--font-size);
+  }
+
+  span {
+    font-size: 2rem;
+    font-weight: bold;
+  }
+}

@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useRef } from 'react';
 import { BiMinus, BiPlus } from 'react-icons/bi';
 import styles from './NumberInput.module.scss';
 
@@ -43,6 +43,20 @@ const handleMouseDown = (callback: () => void) => {
 };
 
 const NumberInput: FC<Props> = ({ value, setValue, min = 0 }) => {
+  const touchStartedRef = useRef(false);
+
+  const handleTouchStart = (callback: () => void) => {
+    touchStartedRef.current = true;
+    handleMouseDown(callback);
+  };
+
+  const handleMouseDownWithCheck = (callback: () => void) => {
+    if (!touchStartedRef.current) {
+      handleMouseDown(callback);
+    }
+    touchStartedRef.current = false;
+  };
+
   return (
     <div className={styles.numberInputContainer}>
       <input
@@ -56,14 +70,24 @@ const NumberInput: FC<Props> = ({ value, setValue, min = 0 }) => {
       <div className={styles.editInputContainer}>
         <BiMinus
           onMouseDown={() =>
-            handleMouseDown(() => {
+            handleMouseDownWithCheck(() => {
+              if (value - 1 >= min) setValue(value - 1);
+            })
+          }
+          onTouchStart={() =>
+            handleTouchStart(() => {
               if (value - 1 >= min) setValue(value - 1);
             })
           }
         />
         <BiPlus
           onMouseDown={() =>
-            handleMouseDown(() => {
+            handleMouseDownWithCheck(() => {
+              setValue(value + 1);
+            })
+          }
+          onTouchStart={() =>
+            handleTouchStart(() => {
               setValue(value + 1);
             })
           }

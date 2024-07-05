@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import styles from './RepSetForm.module.scss';
 import { BiChevronLeft } from 'react-icons/bi';
-import { GiWeight, GiWeightLiftingUp } from 'react-icons/gi';
 import { MdOutlineTimer } from 'react-icons/md';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import {
@@ -13,7 +12,7 @@ import {
 } from '@/services/exerciseService';
 import { RepSet } from '@/types/Exercise';
 import { Loading } from '@/components';
-import NumberInput from '@/components/NumberInput/NumberInput.tsx';
+import RepSetInputs from '@/components/RepSetInputs/RepSetInputs.tsx';
 
 const RepSetForm = () => {
   const { exerciseId, repSetId } = useParams<{
@@ -27,8 +26,8 @@ const RepSetForm = () => {
   const queryClient = useQueryClient();
 
   const [repetitions, setRepetitions] = useState(1);
-  const [weight, setWeight] = useState(1);
-  const [restTime, setRestTime] = useState('00:01:30');
+  const [weight, setWeight] = useState(0);
+  const [restTime, setRestTime] = useState('01:30');
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -143,7 +142,7 @@ const RepSetForm = () => {
     if (timePattern.test(value)) {
       setRestTime(value);
     } else if (value === '') {
-      setRestTime('00:00:00'); // Utilisez une valeur par défaut si l'entrée est vide
+      setRestTime('00:00:00');
     }
   };
 
@@ -161,28 +160,12 @@ const RepSetForm = () => {
 
         <form onSubmit={(e) => e.preventDefault()}>
           <div>
-            <div className={styles.repetitionsContainer}>
-              <div className={styles.inputContainer}>
-                <label>
-                  Répétitions <GiWeightLiftingUp />
-                </label>
-                <NumberInput
-                  value={repetitions}
-                  setValue={setRepetitions}
-                  min={1}
-                />
-              </div>
-              <span>x</span>
-              <div className={styles.inputContainer}>
-                <label>
-                  Poids <GiWeight />
-                </label>
-                <div className={styles.weightInput}>
-                  <NumberInput value={weight} setValue={setWeight} min={0} />
-                  <small>kg</small>
-                </div>
-              </div>
-            </div>
+            <RepSetInputs
+              repetitions={repetitions}
+              setRepetitions={setRepetitions}
+              weight={weight}
+              setWeight={setWeight}
+            />
             <div className={styles.inputContainer}>
               <label>
                 Temps de repos <MdOutlineTimer />
