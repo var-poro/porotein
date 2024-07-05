@@ -13,6 +13,7 @@ import {
 } from '@/services/exerciseService';
 import { RepSet } from '@/types/Exercise';
 import { Loading } from '@/components';
+import NumberInput from '@/components/NumberInput/NumberInput.tsx';
 
 const RepSetForm = () => {
   const { exerciseId, repSetId } = useParams<{
@@ -165,13 +166,9 @@ const RepSetForm = () => {
                 <label>
                   Répétitions <GiWeightLiftingUp />
                 </label>
-                <input
-                  type="tel"
+                <NumberInput
                   value={repetitions}
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value);
-                    setRepetitions(isNaN(value) ? 1 : value); // Utilisez 1 si la valeur est NaN
-                  }}
+                  setValue={setRepetitions}
                   min={1}
                 />
               </div>
@@ -181,15 +178,7 @@ const RepSetForm = () => {
                   Poids <GiWeight />
                 </label>
                 <div className={styles.weightInput}>
-                  <input
-                    type="tel"
-                    value={weight}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      setWeight(isNaN(value) ? 0 : value); // Utilisez 0 si la valeur est NaN
-                    }}
-                    min={0}
-                  />
+                  <NumberInput value={weight} setValue={setWeight} min={0} />
                   <small>kg</small>
                 </div>
               </div>

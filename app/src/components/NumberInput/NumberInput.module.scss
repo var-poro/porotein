@@ -1,0 +1,17 @@
+.editInputContainer {
+  display: flex;
+  margin-top: var(--spacing);
+  gap: var(--spacing);
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    user-select: none;
+    -webkit-user-select: none;
+    border-radius: 50%;
+    padding: calc(var(--spacing) / 2);
+    background: var(--background-color);
+    width: 3rem;
+    height: 3rem;
+  }
+}
