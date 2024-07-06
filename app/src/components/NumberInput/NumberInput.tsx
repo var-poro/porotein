@@ -8,7 +8,7 @@ type Props = {
   min?: number;
 };
 
-const handleMouseDown = (callback: () => void) => {
+const handleMouseDown = (callback: () => void, clearEvents: () => void) => {
   callback();
   const initialDelay = 500;
   let intervalDelay = 200;
@@ -36,6 +36,7 @@ const handleMouseDown = (callback: () => void) => {
     clearTimeout(timeoutId);
     clearInterval(intervalId);
     intervalDelay = 200;
+    clearEvents();
   };
 
   document.addEventListener('mouseup', clearTimers, { once: true });
@@ -45,14 +46,17 @@ const handleMouseDown = (callback: () => void) => {
 const NumberInput: FC<Props> = ({ value, setValue, min = 0 }) => {
   const touchStartedRef = useRef(false);
 
-  const handleTouchStart = (callback: () => void) => {
+  const handleTouchStart = (callback: () => void, clearEvents: () => void) => {
     touchStartedRef.current = true;
-    handleMouseDown(callback);
+    handleMouseDown(callback, clearEvents);
   };
 
-  const handleMouseDownWithCheck = (callback: () => void) => {
+  const handleMouseDownWithCheck = (
+    callback: () => void,
+    clearEvents: () => void
+  ) => {
     if (!touchStartedRef.current) {
-      handleMouseDown(callback);
+      handleMouseDown(callback, clearEvents);
     }
     touchStartedRef.current = false;
   };
@@ -69,29 +73,45 @@ const NumberInput: FC<Props> = ({ value, setValue, min = 0 }) => {
       />
       <div className={styles.editInputContainer}>
         <BiMinus
-          onMouseDown={() =>
-            handleMouseDownWithCheck(() => {
-              if (value - 1 >= min) setValue(value - 1);
-            })
-          }
-          onTouchStart={() =>
-            handleTouchStart(() => {
-              if (value - 1 >= min) setValue(value - 1);
-            })
-          }
+          onMouseDown={(e) => {
+            e.preventDefault(); // Prevent focus on the button
+            handleMouseDownWithCheck(
+              () => {
+                if (value - 1 >= min) setValue(value - 1);
+              },
+              () => {}
+            );
+          }}
+          onTouchStart={(e) => {
+            e.preventDefault(); // Prevent focus on the button
+            handleTouchStart(
+              () => {
+                if (value - 1 >= min) setValue(value - 1);
+              },
+              () => {}
+            );
+          }}
           aria-label="Decrease value"
         />
         <BiPlus
-          onMouseDown={() =>
-            handleMouseDownWithCheck(() => {
-              setValue(value + 1);
-            })
-          }
-          onTouchStart={() =>
-            handleTouchStart(() => {
-              setValue(value + 1);
-            })
-          }
+          onMouseDown={(e) => {
+            e.preventDefault(); // Prevent focus on the button
+            handleMouseDownWithCheck(
+              () => {
+                setValue(value + 1);
+              },
+              () => {}
+            );
+          }}
+          onTouchStart={(e) => {
+            e.preventDefault(); // Prevent focus on the button
+            handleTouchStart(
+              () => {
+                setValue(value + 1);
+              },
+              () => {}
+            );
+          }}
           aria-label="Increase value"
         />
       </div>
