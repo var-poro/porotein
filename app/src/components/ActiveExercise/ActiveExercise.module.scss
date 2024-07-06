@@ -1,7 +1,6 @@
 .activeExercise {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing);
   margin-top: var(--spacing);
 
   button {
@@ -38,7 +37,7 @@
   .exercise {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing);
+    gap: calc(var(--spacing) / 2);
     overflow: hidden;
     transition: height 0.3s ease-in-out;
   }
@@ -59,10 +58,10 @@
 
   .repSetDataContainer {
     width: 100%;
+    margin: var(--spacing) auto;
     display: flex;
     align-items: center;
     gap: var(--spacing);
-    margin-right: auto;
     justify-content: center;
 
     input {
@@ -117,6 +116,7 @@
 
   .header {
     display: flex;
+    margin-top: var(--spacing);
     gap: calc(var(--spacing) / 2);
     align-items: baseline;
   }
@@ -124,9 +124,7 @@
   .buttonsContainer {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: var(--spacing);
-    margin-top: 2rem;
 
     * {
       font-size: 1rem;
