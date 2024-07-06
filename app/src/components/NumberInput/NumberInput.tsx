@@ -14,8 +14,8 @@ const handleMouseDown = (callback: () => void) => {
   let intervalDelay = 200;
   const intervalStep = 50;
   const maxIntervalDelay = 50;
-  let timeoutId: NodeJS.Timeout;
-  let intervalId: NodeJS.Timeout;
+  let timeoutId: ReturnType<typeof setTimeout>;
+  let intervalId: ReturnType<typeof setInterval>;
 
   const startInterval = () => {
     intervalId = setInterval(() => {
@@ -79,6 +79,7 @@ const NumberInput: FC<Props> = ({ value, setValue, min = 0 }) => {
               if (value - 1 >= min) setValue(value - 1);
             })
           }
+          aria-label="Decrease value"
         />
         <BiPlus
           onMouseDown={() =>
@@ -91,6 +92,7 @@ const NumberInput: FC<Props> = ({ value, setValue, min = 0 }) => {
               setValue(value + 1);
             })
           }
+          aria-label="Increase value"
         />
       </div>
     </div>
