@@ -7,8 +7,9 @@
 
 .youtubeVideo iframe {
   border-radius: var(--border-radius);
-  min-width: calc(100svw - 2rem);
-
+  min-width: 568px;
+  max-width: 600px;
+  max-height: 350px;
   width: 100%;
   height: 100%;
   aspect-ratio: 16/9;
