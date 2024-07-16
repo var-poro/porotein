@@ -1,15 +1,16 @@
-import { Exercise } from '@/types/Exercise.ts';
 import { FC, useEffect, useRef, useState } from 'react';
-import YoutubeVideo from '@/components/YoutubeVideo/YoutubeVideo.tsx';
 import { useQuery } from 'react-query';
 import apiClient from '@/services/apiService.ts';
 import styles from './ActiveExercise.module.scss';
 import { Muscle } from '@/types/Muscle.ts';
 import { Tag } from '@/types/Tag.ts';
+import { Exercise } from '@/types/Exercise.ts';
 import { Loading } from '@/components';
 import Timer from '@/components/Timer/Timer.tsx';
 import { BiChevronDown } from 'react-icons/bi';
-import NumberInput from '@/components/NumberInput/NumberInput.tsx';
+import RepSetInputs from '@/components/RepSetInputs/RepSetInputs.tsx';
+import YoutubeVideo from '@/components/YoutubeVideo/YoutubeVideo.tsx';
+import { useLocalStorage } from '@/utils/useLocalStorage.ts';
 
 type Props = {
   exercise: Exercise;
@@ -20,9 +21,10 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
   const [exerciseStarted, setExerciseStarted] = useState<boolean>(false);
   const [repSetIsDone, setRepSetIsDone] = useState<boolean>(false);
   const [currentSeriesIndex, setCurrentSeriesIndex] = useState<number>(0);
-  const [repetitions, setRepetitions] = useState<number>(0);
-  const [weight, setWeight] = useState<number>(0);
+  const [repSets, setRepSets] = useLocalStorage('repSets', []);
+
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  const [videoLoaded, setVideoLoaded] = useState<boolean>(false);
   const exerciseRef = useRef<HTMLDivElement>(null);
 
   const { data: muscles, isLoading: isMusclesLoading } = useQuery(
@@ -63,12 +65,22 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
     setExerciseStarted(false);
     setRepSetIsDone(false);
     setIsCollapsed(false);
+    setVideoLoaded(false); // Reset video loaded state
   }, [exercise]);
 
   useEffect(() => {
     if (exercise.repSets?.[currentSeriesIndex]) {
-      setRepetitions(exercise.repSets[currentSeriesIndex].repetitions);
-      setWeight(exercise.repSets[currentSeriesIndex].weight);
+      const { repetitions, weight, restTime } =
+        exercise.repSets[currentSeriesIndex];
+      setRepSets((prevRepSets: any[]) => {
+        const newRepSets = [...prevRepSets];
+        newRepSets[currentSeriesIndex] = {
+          repetitions,
+          weight,
+          restTime,
+        };
+        return newRepSets;
+      });
     }
   }, [currentSeriesIndex, exercise.repSets]);
 
@@ -80,7 +92,11 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
         exerciseRef.current.style.height = `${exerciseRef.current.scrollHeight}px`;
       }
     }
-  }, [isCollapsed]);
+  }, [isCollapsed, videoLoaded]); // Add videoLoaded to dependencies
+
+  const handleVideoLoad = () => {
+    setVideoLoaded(true); // Set video loaded state to true when video is loaded
+  };
 
   if (isMusclesLoading || isTagsLoading) return <Loading />;
 
@@ -99,7 +115,12 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
         className={`${styles.exercise} ${isCollapsed ? styles.collapsed : ''}`}
       >
         <span>{exercise.description}</span>
-        {exercise.videoUrl && <YoutubeVideo youtubeUrl={exercise.videoUrl} />}
+        {exercise.videoUrl && (
+          <YoutubeVideo
+            youtubeUrl={exercise.videoUrl}
+            onLoad={handleVideoLoad}
+          />
+        )}
         {!exerciseStarted && (
           <div className={styles.buttonsContainer}>
             <button onClick={handleStartExercise}>Démarrer</button>
@@ -148,13 +169,34 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
           {exercise.repSets?.[currentSeriesIndex] && (
             <>
               {!repSetIsDone ? (
-                <div className={styles.repSetDataContainer}>
-                  <NumberInput value={repetitions} setValue={setRepetitions} />
-                  <span className={styles.times}>x</span>
-                  <NumberInput value={weight} setValue={setWeight} />
-                </div>
+                <RepSetInputs
+                  repetitions={repSets[currentSeriesIndex]?.repetitions || 0}
+                  setRepetitions={(value) => {
+                    setRepSets((prevRepSets: any[]) => {
+                      const newRepSets = [...prevRepSets];
+                      newRepSets[currentSeriesIndex].repetitions = value;
+                      return newRepSets;
+                    });
+                  }}
+                  weight={repSets[currentSeriesIndex]?.weight || 0}
+                  setWeight={(value) => {
+                    setRepSets((prevRepSets: any[]) => {
+                      const newRepSets = [...prevRepSets];
+                      newRepSets[currentSeriesIndex].weight = value;
+                      return newRepSets;
+                    });
+                  }}
+                />
               ) : (
                 <Timer
+                  seconds={repSets[currentSeriesIndex]?.restTime || 0}
+                  setSeconds={(value) => {
+                    setRepSets((prevRepSets: any[]) => {
+                      const newRepSets = [...prevRepSets];
+                      newRepSets[currentSeriesIndex].restTime = value;
+                      return newRepSets;
+                    });
+                  }}
                   defaultValue={exercise.repSets?.[currentSeriesIndex].restTime}
                 />
               )}

@@ -5,9 +5,10 @@ import getYoutubeVideoId from '@/utils/getYoutubeVideoId.tsx';
 
 type Props = {
   youtubeUrl: string;
+  onLoad: () => void;
 };
 
-const YoutubeVideo: FC<Props> = ({ youtubeUrl }) => {
+const YoutubeVideo: FC<Props> = ({ youtubeUrl, onLoad }) => {
   const opts = {
     width: '100%',
     height: '100%',
@@ -20,6 +21,10 @@ const YoutubeVideo: FC<Props> = ({ youtubeUrl }) => {
 
   const videoId = getYoutubeVideoId(youtubeUrl);
 
+  const handleReady = () => {
+    onLoad();
+  };
+
   return (
     <div className={styles.videoContainer}>
       {videoId ? (
@@ -27,6 +32,7 @@ const YoutubeVideo: FC<Props> = ({ youtubeUrl }) => {
           className={styles.youtubeVideo}
           videoId={videoId}
           opts={opts}
+          onReady={handleReady} // Ajout de l'événement onReady
         />
       ) : (
         <p>Invalid YouTube URL</p>

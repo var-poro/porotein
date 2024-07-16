@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import {Router} from 'express';
 import {
   createUser,
   deleteUser,
@@ -8,7 +8,7 @@ import {
   updateCurrentUser,
   updateUser,
 } from '../controllers/userController';
-import { auth } from '../middleware/auth';
+import {auth} from '../middleware/auth';
 
 const router = Router();
 

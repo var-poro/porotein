@@ -6,7 +6,6 @@ interface AuthRequest extends Request {
 }
 
 export const getCurrentUser = async (req: AuthRequest, res: Response) => {
-    console.log("Getting current user");
     try {
         const user = await User.findById(req.userId).populate('activeProgram');
         if (!user) {

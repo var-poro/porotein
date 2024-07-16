@@ -5,6 +5,7 @@ import styles from './RepSetInputs.module.scss';
 
 type Props = {
   repetitions: number;
+  withLabels?: boolean;
   setRepetitions: (value: number) => void;
   weight: number;
   setWeight: (value: number) => void;
@@ -12,6 +13,7 @@ type Props = {
 
 const RepSetInputs: FC<Props> = ({
   repetitions,
+  withLabels,
   setRepetitions,
   weight,
   setWeight,
@@ -19,16 +21,20 @@ const RepSetInputs: FC<Props> = ({
   return (
     <div className={styles.repetitionsContainer}>
       <div className={styles.inputContainer}>
-        <label>
-          Répétitions <GiWeightLiftingUp />
-        </label>
+        {withLabels && (
+          <label>
+            Répétitions <GiWeightLiftingUp />
+          </label>
+        )}
         <NumberInput value={repetitions} setValue={setRepetitions} min={1} />
       </div>
       <span className={styles.times}>x</span>
       <div className={styles.inputContainer}>
-        <label>
-          Poids <GiWeight />
-        </label>
+        {withLabels && (
+          <label>
+            Poids <GiWeight />
+          </label>
+        )}
         <div className={styles.weightInput}>
           <NumberInput value={weight} setValue={setWeight} min={0} />
           <small>kg</small>
