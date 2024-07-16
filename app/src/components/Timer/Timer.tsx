@@ -5,11 +5,12 @@ import { GrPowerReset } from 'react-icons/gr';
 import { IoWaterOutline } from 'react-icons/io5';
 
 type Props = {
+  seconds: number;
+  setSeconds: (value: number) => void;
   defaultValue: number;
 };
 
-const Timer: FC<Props> = ({ defaultValue }) => {
-  const [seconds, setSeconds] = useState(defaultValue);
+const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
   const [isRunning, setIsRunning] = useState(true); // Start running by default
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
@@ -102,6 +103,9 @@ const Timer: FC<Props> = ({ defaultValue }) => {
               type="text"
               value={convertSecondsToTime(seconds)}
               onChange={(e) => handleInputChange(e.target.value)}
+              style={{
+                color: seconds <= 15 ? 'red' : '#000000',
+              }}
               className={styles.timeDisplay}
             />
             <input

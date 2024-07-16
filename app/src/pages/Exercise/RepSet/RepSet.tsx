@@ -162,6 +162,7 @@ const RepSetForm = () => {
           <div>
             <RepSetInputs
               repetitions={repetitions}
+              withLabels
               setRepetitions={setRepetitions}
               weight={weight}
               setWeight={setWeight}
