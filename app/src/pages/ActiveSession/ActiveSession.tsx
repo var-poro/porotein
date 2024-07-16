@@ -47,7 +47,7 @@ const ActiveSession = () => {
     return (
       <div>
         <span>
-          Il n'existe aucun exercice pour la séance {sessionData.name}
+          Il n'existe aucun exercice pour la séance {sessionData?.name}
         </span>
         <button onClick={() => navigate(`/sessions/${sessionData.id}`)}>
           Modifier la séance
@@ -59,10 +59,12 @@ const ActiveSession = () => {
   return (
     <div className={styles.container}>
       <div className={styles.headerContainer}>
-        <h5>{sessionData.name}</h5>
-        <small>
-          À suivre : {sessionData.exercises[exerciseIndex + 1].name}
-        </small>
+        <h5>{sessionData?.name}</h5>
+        {sessionData.exercises[exerciseIndex + 1] && (
+          <small>
+            À suivre : {sessionData.exercises[exerciseIndex + 1]?.name}
+          </small>
+        )}
         <h5>
           {exerciseIndex + 1} / {sessionData.exercises.length}
         </h5>
