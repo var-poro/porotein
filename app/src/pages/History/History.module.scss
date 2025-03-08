@@ -1,0 +1,223 @@
+.historyContainer {
+  padding: 1rem;
+}
+
+.filters {
+  display: flex;
+
+  button {
+    display: flex;
+    color: var(--text-color);
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-radius: 0;
+
+    &:first-child {
+      border-radius: var(--border-radius) 0 0 var(--border-radius);
+    }
+
+    &:last-child {
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
+      border-left: none;
+    }
+
+    &:not(:first-child) {
+      border-left: none;
+    }
+
+    &.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+
+      & + button {
+        border-left: none;
+      }
+    }
+  }
+}
+
+.viewControls {
+  display: flex;
+
+  button {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+    cursor: pointer;
+    color: var(--text-color); 
+
+    &:first-child {
+      border-radius: var(--border-radius) 0 0 var(--border-radius);
+    }
+
+    &:last-child {
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
+      border-left: none;
+    }
+
+    svg {
+      font-size: 1.25rem;
+    }
+
+    &.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+
+      & + button {
+        border-left: none;
+      }
+    }
+  }
+}
+
+.controlsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: .5rem 0;
+}
+
+.savedSession {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  margin: 0.5rem 0;
+  background: #f9f9f9;
+  cursor: pointer;
+
+  &:hover {
+    background: #f1f1f1;
+  }
+}
+
+.sessionInfo {
+  flex: 1;
+
+  .date {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+}
+
+.exercises {
+  margin-top: 1rem;
+
+  .exercise {
+    margin-bottom: 0.5rem;
+
+    h4 {
+      margin: 0 0 0.5rem;
+    }
+
+    .repSet {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0 0;
+}
+
+.viewControls {
+  display: flex;
+  margin: 1rem 0;
+
+  button {
+    color: var(--text-color);
+    display: flex;
+    margin: 0;
+    align-items: center;
+    .filters {
+      display: flex;
+    
+      button {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        background: var(--surface-color);
+        cursor: pointer;
+        transition: background-color 0.2s;
+    
+        &:first-child {
+          border-radius: var(--border-radius) 0 0 var(--border-radius);
+        }
+    
+        &:last-child {
+          border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+    
+        &:not(:first-child) {
+          border-left: none;
+        }
+    
+        &.active {
+          background: var(--primary-color);
+          color: white;
+          border-color: var(--primary-color);
+    
+          & + button {
+            border-left: none;
+          }
+        }
+      }
+    }
+    font-size: .8rem;
+    transition: background-color 0.2s;
+
+    &:first-child {
+      border-radius: var(--border-radius) 0 0 var(--border-radius);
+    }
+
+    &:last-child {
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
+      border-left: none;
+    }
+
+    svg {
+      font-size: 1.25rem;
+    }
+
+    &.active {
+      background: var(--primary-color);
+      color: white;
+
+      & + button {
+        border-left: none;
+      }
+    }
+  }
+}
+
+.calendarContainer {
+  height: 600px;
+  margin-top: 1rem;
+
+  :global {
+    .rbc-calendar {
+      background: var(--surface-color);
+      border-radius: var(--border-radius);
+      padding: 1rem;
+    }
+
+    .rbc-event {
+      background-color: var(--primary-color);
+    }
+  }
+}

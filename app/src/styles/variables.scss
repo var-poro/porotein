@@ -9,8 +9,24 @@ $font-family: 'Arial, sans-serif';
   --header-font-family: 'Prata';
   --primary-color: #1a85ff;
   --border-radius: 12px;
-  --secondary-color: #2ecc71;
+  --border-color: #ddd;
+  
+  // Success colors
+  --success-color: #2ecc71;
+  --success-bg-color: rgba(46, 204, 113, 0.1);
+  
+  // Error colors
+  --error-color: #e74c3c;
+  --error-bg-color: rgba(231, 76, 60, 0.1);
+  
+  // Surface colors
+  --surface-color: #ffffff;
+  --surface-hover-color: #f8f9fa;
+  
+  // Text colors
   --text-color: #000000;
+  --text-secondary-color: #6c757d;
+  
   --delete-color: #ff5050;
   --background-color: #eeeff1;
   --spacing: 1rem;

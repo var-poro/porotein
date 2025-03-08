@@ -18,7 +18,7 @@ export const createSession = async (session: Session) => {
 };
 
 export const updateSession = async (id: string, session: Session) => {
-  const response = await apiClient.put(`/sessions/${id}`, session); // Utilisation de put pour une mise à jour complète
+  const response = await apiClient.put(`/sessions/${id}`, session);
   return response.data;
 };
 
@@ -57,5 +57,10 @@ export const deleteExerciseFromSession = async (
   const response = await apiClient.delete(
     `/sessions/${sessionId}/exercises/${exerciseId}`
   );
+  return response.data;
+};
+
+export const getRecommendedSessions = async () => {
+  const response = await apiClient.get('/saved-sessions/recommended');
   return response.data;
 };
