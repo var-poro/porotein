@@ -84,3 +84,87 @@ export const getAllUsers = async (req: Request, res: Response) => {
         res.status(500).send(error);
     }
 };
+
+// Add a new weight entry
+export const addWeight = async (req: AuthRequest, res: Response) => {
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            return res.status(404).send();
+        }
+        
+        const weightEntry = {
+            weight: req.body.weight,
+            date: new Date(req.body.date || Date.now())
+        };
+        
+        user.weightHistory.push(weightEntry);
+        await user.save();
+        
+        res.status(201).send(weightEntry);
+    } catch (error) {
+        res.status(400).send(error);
+    }
+};
+
+// Get weight history
+export const getWeightHistory = async (req: AuthRequest, res: Response) => {
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            return res.status(404).send();
+        }
+        
+        res.send(user.weightHistory);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+};
+
+// Update a weight entry
+export const updateWeight = async (req: AuthRequest, res: Response) => {
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            return res.status(404).send();
+        }
+
+        const entryIndex = user.weightHistory.findIndex(
+            entry => entry._id.toString() === req.params.entryId
+        );
+
+        if (entryIndex === -1) {
+            return res.status(404).send();
+        }
+
+        user.weightHistory[entryIndex] = {
+            ...user.weightHistory[entryIndex],
+            weight: req.body.weight,
+            date: new Date(req.body.date)
+        };
+
+        await user.save();
+        res.send(user.weightHistory[entryIndex]);
+    } catch (error) {
+        res.status(400).send(error);
+    }
+};
+
+// Delete a weight entry
+export const deleteWeight = async (req: AuthRequest, res: Response) => {
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            return res.status(404).send();
+        }
+
+        user.weightHistory = user.weightHistory.filter(
+            entry => entry._id.toString() !== req.params.entryId
+        );
+
+        await user.save();
+        res.send({ message: 'Weight entry deleted' });
+    } catch (error) {
+        res.status(500).send(error);
+    }
+};

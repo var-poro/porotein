@@ -14,6 +14,8 @@ import {
 import apiClient from '@/services/apiService';
 import { Exercise, RepSet } from '@/types/Exercise';
 import { createRepSet } from '@/services/exerciseService.ts';
+import { Muscle } from '@/types/Muscle';
+import { Tag } from '@/types/Tag';
 
 const ExerciseForm = () => {
   const { exerciseId } = useParams<{ exerciseId?: string }>();
@@ -117,6 +119,7 @@ const ExerciseForm = () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       repSets,
+      duration: 0
     };
 
     if (isEditMode) {
@@ -127,7 +130,7 @@ const ExerciseForm = () => {
   };
 
   const handleDuplicateRepSet = (repSet: RepSet) => {
-    var newRepSet = { ...repSet, _id: undefined };
+    const newRepSet = { ...repSet, _id: undefined };
     createRepSetMutation.mutate(newRepSet);
   };
 
@@ -178,7 +181,7 @@ const ExerciseForm = () => {
         <div className={styles.inputContainer}>
           <label htmlFor="muscles">Muscles</label>
           <TagSelector
-            availableTags={muscles.map((muscle: any) => ({
+            availableTags={muscles.map((muscle: Muscle) => ({
               id: muscle._id,
               name: muscle.name,
             }))}
@@ -189,7 +192,7 @@ const ExerciseForm = () => {
         <div className={styles.inputContainer}>
           <label htmlFor="tags">Tags</label>
           <TagSelector
-            availableTags={tags.map((tag: any) => ({
+            availableTags={tags.map((tag: Tag) => ({
               id: tag._id,
               name: tag.name,
             }))}

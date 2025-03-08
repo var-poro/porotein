@@ -9,7 +9,6 @@ import {
 } from '@/components';
 import {
   getAllPrograms,
-  getProgramSessions,
   getUserData,
 } from '@/services/userService';
 import { User } from '@/types/User';
@@ -17,6 +16,7 @@ import { useQuery } from 'react-query';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { BiPlus } from 'react-icons/bi';
+import { getRecommendedSessions } from '@/services/sessionService';
 
 const Home: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -31,13 +31,6 @@ const Home: React.FC = () => {
   const { data: programs, isLoading: isLoadingPrograms } = useQuery(
     'programs',
     getAllPrograms
-  );
-  const { data: sessions, isLoading: isLoadingSessions } = useQuery(
-    ['programSessions', activeProgram],
-    () => getProgramSessions(activeProgram || ''),
-    {
-      enabled: !!activeProgram,
-    }
   );
 
   const formattedDate = format(new Date(), 'EEEE dd MMMM', { locale: fr });
@@ -66,7 +59,15 @@ const Home: React.FC = () => {
     navigate('/session/create');
   };
 
-  if (isLoadingUser || isLoadingPrograms || isLoadingSessions) {
+  const { data: recommendedData, isLoading: isLoadingRecommended } = useQuery(
+    ['recommendedSessions', activeProgram],
+    getRecommendedSessions,
+    {
+      enabled: !!activeProgram,
+    }
+  );
+
+  if (isLoadingUser || isLoadingPrograms || isLoadingRecommended) {
     return <Loading />;
   }
 
@@ -74,12 +75,16 @@ const Home: React.FC = () => {
     <div className={styles.homePage}>
       <span className={styles.date}>{formattedDateCapitalized}</span>
       <h2>Séance recommandée</h2>
-      {sessions && sessions.length > 0 ? (
+      {recommendedData?.recommended ? (
         <>
-          <RecommendedSession session={sessions[0]} />
+          <RecommendedSession 
+            session={recommendedData.recommended}
+            lastPerformed={recommendedData.lastPerformed[recommendedData.recommended._id]}
+          />
           <h3>Autres séances</h3>
-          <SuggestedSessions sessions={sessions.slice(1)} />
-
+          <SuggestedSessions 
+            sessions={recommendedData.otherSessions}
+          />
           <button onClick={handleCreateSession} className={styles.addSession}>
             <BiPlus className={styles.addSessionIcon} />
             <span>Créer une nouvelle séance</span>

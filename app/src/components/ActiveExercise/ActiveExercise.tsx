@@ -18,13 +18,12 @@ type Props = {
 };
 
 const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
-  const [exerciseStarted, setExerciseStarted] = useState<boolean>(false);
-  const [repSetIsDone, setRepSetIsDone] = useState<boolean>(false);
-  const [currentSeriesIndex, setCurrentSeriesIndex] = useState<number>(0);
-  const [repSets, setRepSets] = useLocalStorage('repSets', []);
-
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
-  const [videoLoaded, setVideoLoaded] = useState<boolean>(false);
+  const [exerciseStarted, setExerciseStarted] = useState(false);
+  const [repSetIsDone, setRepSetIsDone] = useState(false);
+  const [currentSeriesIndex, setCurrentSeriesIndex] = useState(0);
+  const [repSets, setRepSets] = useLocalStorage(`repSets_${exercise._id}`, exercise.repSets);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const exerciseRef = useRef<HTMLDivElement>(null);
 
   const { data: muscles, isLoading: isMusclesLoading } = useQuery(
@@ -43,17 +42,52 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
     }
   );
 
+  const saveExerciseToLocal = () => {
+    const savedSession = JSON.parse(
+      localStorage.getItem('activeSession') || '{"exercises": []}'
+    );
+  
+    const currentRepSets = repSets || exercise.repSets || [];
+  
+    const updatedSession = {
+      ...savedSession,
+      programId: savedSession.programId,
+      duration: savedSession.duration || 0,
+      exercises: (savedSession.exercises || []).map((ex: Exercise) =>
+        ex._id === exercise._id
+          ? {
+              exerciseId: exercise._id,
+              name: exercise.name,
+              duration: ex.duration || 0,
+              repSets: currentRepSets.map((repSet: any, index: number) => ({
+                repSetId: `${exercise._id}_${index}`,
+                repetitions: Number(repSet.repetitions) || 0,
+                weight: Number(repSet.weight) || 0,
+                restTime: repSet.restTime !== undefined ? Number(repSet.restTime) : exercise.repSets[index].restTime,
+                duration: repSet.duration || 0,
+              })),
+            }
+          : ex
+      ),
+    };
+  
+    localStorage.setItem('activeSession', JSON.stringify(updatedSession));
+  };
+
   const handleNextRepSet = () => {
-    if (!repSetIsDone) setRepSetIsDone(true);
-    else {
+    if (!repSetIsDone) {
+      setRepSetIsDone(true);
+    } else {
       setRepSetIsDone(false);
       setCurrentSeriesIndex(currentSeriesIndex + 1);
     }
+    saveExerciseToLocal();
   };
 
   const handleStartExercise = () => {
     setExerciseStarted(true);
     setIsCollapsed(true);
+    saveExerciseToLocal();
   };
 
   const toggleCollapse = () => {
@@ -65,24 +99,9 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
     setExerciseStarted(false);
     setRepSetIsDone(false);
     setIsCollapsed(false);
-    setVideoLoaded(false); // Reset video loaded state
+    setVideoLoaded(false);
+    setRepSets(exercise.repSets);
   }, [exercise]);
-
-  useEffect(() => {
-    if (exercise.repSets?.[currentSeriesIndex]) {
-      const { repetitions, weight, restTime } =
-        exercise.repSets[currentSeriesIndex];
-      setRepSets((prevRepSets: any[]) => {
-        const newRepSets = [...prevRepSets];
-        newRepSets[currentSeriesIndex] = {
-          repetitions,
-          weight,
-          restTime,
-        };
-        return newRepSets;
-      });
-    }
-  }, [currentSeriesIndex, exercise.repSets]);
 
   useEffect(() => {
     if (exerciseRef.current) {
@@ -92,10 +111,10 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
         exerciseRef.current.style.height = `${exerciseRef.current.scrollHeight}px`;
       }
     }
-  }, [isCollapsed, videoLoaded]); // Add videoLoaded to dependencies
+  }, [isCollapsed, videoLoaded]);
 
   const handleVideoLoad = () => {
-    setVideoLoaded(true); // Set video loaded state to true when video is loaded
+    setVideoLoaded(true);
   };
 
   if (isMusclesLoading || isTagsLoading) return <Loading />;
@@ -131,33 +150,29 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
         <div className={styles.tagsContainer}>
           {muscles
             .filter((muscle: Muscle) =>
-              exercise.targetMuscles.some((exerciceMuscle: string) => {
-                return exerciceMuscle === muscle._id;
-              })
+              exercise.targetMuscles.some(
+                (exerciceMuscle: string) => exerciceMuscle === muscle._id
+              )
             )
-            .map((muscle: Muscle) => {
-              return (
-                <div className={styles.tag} key={muscle._id}>
-                  {muscle.name}
-                </div>
-              );
-            })}
+            .map((muscle: Muscle) => (
+              <div className={styles.tag} key={muscle._id}>
+                {muscle.name}
+              </div>
+            ))}
         </div>
         <h5>Tags</h5>
         <div className={styles.tagsContainer}>
           {tags
             .filter((tag: Tag) =>
-              exercise.tags.some((exerciceTag: string) => {
-                return exerciceTag === tag._id;
-              })
+              exercise.tags.some(
+                (exerciceTag: string) => exerciceTag === tag._id
+              )
             )
-            .map((tag: Tag) => {
-              return (
-                <div className={styles.tag} key={tag._id}>
-                  {tag.name}
-                </div>
-              );
-            })}
+            .map((tag: Tag) => (
+              <div className={styles.tag} key={tag._id}>
+                {tag.name}
+              </div>
+            ))}
         </div>
       </div>
       {exerciseStarted && (
@@ -177,6 +192,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
                       newRepSets[currentSeriesIndex].repetitions = value;
                       return newRepSets;
                     });
+                    saveExerciseToLocal();
                   }}
                   weight={repSets[currentSeriesIndex]?.weight || 0}
                   setWeight={(value) => {
@@ -185,6 +201,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
                       newRepSets[currentSeriesIndex].weight = value;
                       return newRepSets;
                     });
+                    saveExerciseToLocal();
                   }}
                 />
               ) : (
@@ -196,6 +213,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
                       newRepSets[currentSeriesIndex].restTime = value;
                       return newRepSets;
                     });
+                    saveExerciseToLocal();
                   }}
                   defaultValue={exercise.repSets?.[currentSeriesIndex].restTime}
                 />

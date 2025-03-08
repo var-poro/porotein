@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "scripts": {
+    "dev:api": "pnpm --filter api dev --host",
+    "dev:app": "pnpm --filter app dev --host",
+    "dev": "concurrently \"pnpm run dev:api\" \"pnpm run dev:app\""
+  }
+}

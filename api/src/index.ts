@@ -3,6 +3,8 @@ import cors from 'cors';
 import connectDB from './config/database';
 import sessionRoutes from './routes/sessionRoutes';
 import exerciseRoutes from './routes/exerciseRoutes';
+import savedSessionRoutes from "./routes/savedSessionRoutes";
+import savedExerciseRoutes from "./routes/savedExerciseRoutes";
 import supplementRoutes from './routes/supplementRoutes';
 import userRoutes from './routes/userRoutes';
 import programRoutes from './routes/programRoutes';
@@ -13,6 +15,7 @@ import authRoutes from './routes/authRoutes';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from "node:path";
+import weightRoutes from './routes/weightRoutes';
 
 dotenv.config();
 
@@ -21,7 +24,7 @@ const PORT = process.env.PORT || 4000;
 
 // Middleware CORS
 const corsOptions = {
-    origin: ['http://localhost:4173', 'http://localhost:5173', 'https://porotein.fr'],
+    origin: ['http://localhost:4173', "http://192.168.1.112:5173/", "http://192.168.1.67:5173", 'http://localhost:5173', 'https://porotein.fr'],
     credentials: true,
 };
 app.use(cors(corsOptions));
@@ -48,10 +51,13 @@ app.use('/users', userRoutes);
 app.use('/programs', programRoutes);
 app.use('/sessions', sessionRoutes);
 app.use('/exercises', exerciseRoutes);
+app.use('/saved-sessions', savedSessionRoutes);
+app.use('/saved-exercises', savedExerciseRoutes);
 app.use('/tags', tagRoutes);
 app.use('/muscles', muscleRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/supplements', supplementRoutes);
+app.use('/api/weight', weightRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

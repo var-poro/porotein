@@ -16,6 +16,7 @@ import RepSetForm from '@/pages/Exercise/RepSet/RepSet.tsx';
 import MuscleManager from '@/pages/Muscle/MuscleManager.tsx';
 import TagManager from '@/pages/Tag/TagManager.tsx';
 import ActiveSession from '@/pages/ActiveSession/ActiveSession.tsx';
+import Recapitulatif from '@/pages/ActiveSession/Recapitulatif.tsx';
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
             <Route path="/history" element={<History />} />
 
             <Route path="/workout/:id" element={<ActiveSession />} />
+            <Route path="/workout/:id/recap" element={<Recapitulatif />} />
           </Route>
         </Routes>
       </Router>

@@ -4,7 +4,7 @@ import styles from './BottomNav.module.scss';
 import { CgProfile } from 'react-icons/cg';
 import { IoIosFitness } from 'react-icons/io';
 import { PiNotepad } from 'react-icons/pi';
-import { TbHistory } from 'react-icons/tb';
+import { PiChartLineDuotone } from 'react-icons/pi';
 
 const BottomNav: React.FC = () => {
   const location = useLocation();
@@ -31,7 +31,7 @@ const BottomNav: React.FC = () => {
           navLinkIsActive ? styles.active : ''
         }
       >
-        <TbHistory />
+        <PiChartLineDuotone />
       </NavLink>
       <NavLink
         to="/my-program"

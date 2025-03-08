@@ -6,6 +6,8 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { getUserData, updateUserData } from '@/services/userService';
 import styles from './Profile.module.scss';
 import { Loading } from '@/components';
+import WeightChart from '../Weight/components/WeightChart';
+import { WeightDetail as WeightDetailType } from '@/types/Weight';
 
 interface ProfileFormInputs {
   username: string;
@@ -48,9 +50,19 @@ const Profile: React.FC = () => {
     return <Loading />;
   }
 
+  const formattedWeightHistory: WeightDetailType[] = userData?.weightHistory.map(entry => ({
+    ...entry,
+    date: typeof entry.date === 'string' ? entry.date : new Date(entry.date).toISOString(),
+  })) || [];
+
   return (
     <div className={styles.profilePage}>
       <h1>Profile</h1>
+      
+      <div className={styles.weightSection}>
+        <WeightChart data={formattedWeightHistory} />
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className={styles.profileForm}>
         <div className={styles.formGroup}>
           <label htmlFor="username">Username</label>

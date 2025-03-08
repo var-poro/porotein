@@ -37,6 +37,10 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
           setSeconds(0);
         } else {
           setSeconds(remainingTime);
+          // Vibrate when 5 seconds or less remaining
+          if (remainingTime <= 5 && 'vibrate' in navigator) {
+            navigator.vibrate(200);
+          }
         }
       }, 1000);
 

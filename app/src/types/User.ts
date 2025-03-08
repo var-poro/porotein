@@ -1,6 +1,7 @@
 import { Program } from '@/types/Program';
 
 export interface WeightDetail {
+  _id: string;
   weight: number;
   date: Date;
 }

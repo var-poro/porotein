@@ -1,0 +1,76 @@
+.weightForm {
+  background: var(--background-secondary);
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  
+  .formGroup {
+      margin: 1rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+    .formGroup {
+      display: flex;
+      gap: 0.5rem;
+      
+      input {
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--background-primary);
+        color: var(--text-primary);
+        
+        &:focus {
+          outline: none;
+          border-color: var(--primary-color);
+        }
+      }
+
+      button {
+        padding: 0.5rem 1rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        
+        &:hover {
+          background: var(--primary-color-dark);
+        }
+      }
+    }
+  }
+}
+.buttons {
+  display: flex;
+  gap: 0.5rem;
+  button {
+    margin: 0;
+  }
+
+  .deleteButton {
+    background: var(--delete-color);
+    color: white;
+
+    &:hover {
+      background: var(--danger-color-dark);
+    }
+  }
+}
+.inputWithUnit {
+  position: relative;
+  flex: 1;
+
+  input {
+    width: 100%;
+    padding-right: 2.5rem;
+  }
+
+  .unit {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+  }
+}
