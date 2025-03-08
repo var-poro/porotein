@@ -130,7 +130,7 @@ export const updateWeight = async (req: AuthRequest, res: Response) => {
         }
 
         const entryIndex = user.weightHistory.findIndex(
-            entry => entry._id.toString() === req.params.entryId
+            entry => entry._id?.toString() === req.params.entryId
         );
 
         if (entryIndex === -1) {
@@ -159,7 +159,7 @@ export const deleteWeight = async (req: AuthRequest, res: Response) => {
         }
 
         user.weightHistory = user.weightHistory.filter(
-            entry => entry._id.toString() !== req.params.entryId
+            entry => entry._id?.toString() !== req.params.entryId
         );
 
         await user.save();

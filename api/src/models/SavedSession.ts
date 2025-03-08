@@ -57,8 +57,8 @@ savedSessionSchema.post('save', async function (doc) {
     console.log('Session before update:', JSON.stringify(session, null, 2));
 
     for (const exercise of session.exercises) {
-      const savedExercise = savedSession.exercises.find(
-        ex => ex.exerciseId.toString() === exercise._id.toString()
+      const savedExercise = savedSession.savedExercises.find(
+        (ex: ISavedExercise) => ex.exerciseId.toString() === exercise._id?.toString()
       );
       
       if (savedExercise) {
@@ -69,7 +69,7 @@ savedSessionSchema.post('save', async function (doc) {
           exercise._id,
           {
             $set: {
-              repSets: savedExercise.repSets.map(rs => ({
+              repSets: savedExercise.repSets.map((rs: { repetitions: number; weight: number; restTime: number }) => ({
                 repetitions: Number(rs.repetitions),
                 weight: Number(rs.weight),
                 restTime: Number(rs.restTime)
