@@ -3,6 +3,7 @@ import styles from './Timer.module.scss';
 import { PiPauseBold, PiTriangleBold } from 'react-icons/pi';
 import { GrPowerReset } from 'react-icons/gr';
 import { IoWaterOutline } from 'react-icons/io5';
+import { requestNotificationPermission, sendNotification } from '@/services/notificationService';
 
 type Props = {
   seconds: number;
@@ -14,6 +15,15 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
   const [isRunning, setIsRunning] = useState(true); // Start running by default
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  useEffect(() => {
+    const checkNotificationPermission = async () => {
+      const granted = await requestNotificationPermission();
+      setNotificationsEnabled(granted);
+    };
+    checkNotificationPermission();
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -35,9 +45,19 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
           clearInterval(interval);
           setIsRunning(false);
           setSeconds(0);
+          // Envoyer une notification quand le timer est terminé
+          if (notificationsEnabled) {
+            sendNotification('Temps de repos terminé ! 💪', {
+              body: 'C\'est reparti pour une nouvelle série !',
+              requireInteraction: true
+            });
+            if ('vibrate' in navigator) {
+              navigator.vibrate([200, 100, 200]);
+            }
+          }
         } else {
           setSeconds(remainingTime);
-          // Vibrate when 5 seconds or less remaining
+          // Vibrer quand il reste 5 secondes ou moins
           if (remainingTime <= 5 && 'vibrate' in navigator) {
             navigator.vibrate(200);
           }
