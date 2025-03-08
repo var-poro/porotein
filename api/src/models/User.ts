@@ -2,6 +2,7 @@ import { Document, model, Schema } from 'mongoose';
 import Program from './Program';
 
 interface IWeightDetail {
+  _id?: Schema.Types.ObjectId;
   weight: number;
   date: Date;
 }
