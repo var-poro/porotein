@@ -21,15 +21,15 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
   useEffect(() => {
     const savedTimer = localStorage.getItem('timer_state');
     if (savedTimer) {
-      const { savedSeconds, savedStartTime, wasRunning } = JSON.parse(savedTimer);
-      if (savedSeconds && savedStartTime) {
-        const elapsedTime = Math.floor(
-          (Date.now() - new Date(savedStartTime).getTime()) / 1000
-        );
-        const remainingTime = savedSeconds - elapsedTime;
+      const { endTime, wasRunning } = JSON.parse(savedTimer);
+      if (endTime) {
+        const now = new Date();
+        const end = new Date(endTime);
+        const remainingTime = Math.ceil((end.getTime() - now.getTime()) / 1000);
+        
         if (remainingTime > 0) {
           setSeconds(remainingTime);
-          setStartTime(new Date(savedStartTime));
+          setStartTime(new Date(end.getTime() - remainingTime * 1000));
           setIsRunning(wasRunning);
         } else {
           localStorage.removeItem('timer_state');
@@ -44,8 +44,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
       localStorage.setItem(
         'timer_state',
         JSON.stringify({
-          savedSeconds: seconds,
-          savedStartTime: startTime.toISOString(),
+          endTime: new Date(startTime.getTime() + seconds * 1000).toISOString(),
           wasRunning: isRunning
         })
       );
@@ -66,17 +65,17 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
     let interval: NodeJS.Timeout;
 
     if (isRunning) {
-      const now = new Date();
+      const endTime = startTime ? 
+        new Date(startTime.getTime() + seconds * 1000) : 
+        new Date(Date.now() + seconds * 1000);
+
       if (!startTime) {
-        setStartTime(now);
+        setStartTime(new Date());
       }
 
       interval = setInterval(() => {
-        const elapsedTime = Math.floor(
-          (new Date().getTime() - (startTime?.getTime() || now.getTime())) /
-            1000
-        );
-        const remainingTime = seconds - elapsedTime;
+        const now = new Date();
+        const remainingTime = Math.max(0, Math.ceil((endTime.getTime() - now.getTime()) / 1000));
 
         if (remainingTime <= 0) {
           clearInterval(interval);
@@ -99,7 +98,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
             navigator.vibrate(200);
           }
         }
-      }, 1000);
+      }, 100); // Intervalle plus court pour une mise à jour plus fluide
 
       setIntervalId(interval);
     } else if (intervalId) {
@@ -111,7 +110,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
         clearInterval(interval);
       }
     };
-  }, [isRunning, startTime, seconds, notificationsEnabled]);
+  }, [isRunning, startTime, notificationsEnabled]);
 
   const handleStart = () => {
     if (!isRunning) {
@@ -142,18 +141,13 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
     return `${mins}:${secs}`;
   };
 
-  const handleInputChange = (value: string) => {
+  const handleTimeChange = (value: string) => {
     const [minutes, seconds] = value.split(':').map(Number);
     const totalSeconds = minutes * 60 + (seconds || 0);
     setSeconds(totalSeconds);
-    setStartTime(new Date());
-  };
-
-  const handleTimeInputChange = (value: string) => {
-    const [minutes, seconds] = value.split(':').map(Number);
-    const totalSeconds = minutes * 60 + (seconds || 0);
-    setSeconds(totalSeconds);
-    setStartTime(new Date());
+    if (isRunning) {
+      setStartTime(new Date());
+    }
   };
 
   return (
@@ -169,7 +163,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
             <input
               type="text"
               value={convertSecondsToTime(seconds)}
-              onChange={(e) => handleInputChange(e.target.value)}
+              onChange={(e) => handleTimeChange(e.target.value)}
               style={{
                 color: seconds <= 15 ? 'red' : '#000000',
               }}
@@ -178,7 +172,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
             <input
               type="time"
               value={convertSecondsToTime(defaultValue)}
-              onChange={(e) => handleTimeInputChange(e.target.value)}
+              onChange={(e) => handleTimeChange(e.target.value)}
               className={styles.timePicker}
               min={'00:00'}
               max={'59:59'}
