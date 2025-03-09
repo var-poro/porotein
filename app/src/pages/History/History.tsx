@@ -76,16 +76,16 @@ const History = () => {
     });
 
     const currentStats = {
-      sessionsCount: currentData.length,
-      exercisesCount: currentData.reduce((acc, session) => acc + session.exercises.length, 0),
-      totalDuration: currentData.reduce((acc, session) => acc + session.duration, 0),
+      sessionsCount: currentData.length || 0,
+      exercisesCount: currentData.reduce((acc, session) => acc + (session.savedExercises?.length || 0), 0),
+      totalDuration: currentData.reduce((acc, session) => acc + (session.duration || 0), 0),
       streak: calculateStreak(),
     };
 
     const previousStats = {
-      sessionsCount: previousPeriodData.length,
-      exercisesCount: previousPeriodData.reduce((acc: number, session: SavedSession) => acc + session.exercises.length, 0),
-      totalDuration: previousPeriodData.reduce((acc: number, session: SavedSession) => acc + session.duration, 0),
+      sessionsCount: previousPeriodData.length || 0,
+      exercisesCount: previousPeriodData.reduce((acc: number, session: SavedSession) => acc + (session.savedExercises?.length || 0), 0),
+      totalDuration: previousPeriodData.reduce((acc: number, session: SavedSession) => acc + (session.duration || 0), 0),
     };
 
     return {
@@ -126,7 +126,7 @@ const History = () => {
         />
         <HistoryTile
           icon={FaFire}
-          value={`${stats.current.streak}`}
+          value={stats.current.streak}
           label={`jour${stats.current.streak > 1 ? 's' : ''} consécutif${stats.current.streak > 1 ? 's' : ''}`}
         />
       </div>

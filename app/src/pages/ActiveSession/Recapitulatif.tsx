@@ -9,7 +9,6 @@ import { Tile, TileContainer } from '@/components/Tile';
 import { ExerciseChart } from '@/components/ExerciseChart/ExerciseChart';
 import { BiLineChart, BiUpArrowAlt, BiDownArrowAlt, BiMinus } from 'react-icons/bi';
 import { SavedExercise, SavedSession } from '@/types/SavedSession';
-import { Exercise } from '@/types/Exercise';
 
 const Recapitulatif = () => {
   const { id } = useParams();
@@ -34,28 +33,42 @@ const Recapitulatif = () => {
   if (sessionLoading || historyLoading) return <Loading />;
 
   const prepareExerciseHistory = (exerciseId: string) => {
-    return historicalSessions?.map((savedSession: SavedSession) => {
+    console.log('Historical Sessions:', historicalSessions);
+    console.log('Exercise ID:', exerciseId);
+    
+    const history = historicalSessions?.map((savedSession: SavedSession) => {
+      console.log('Processing session:', savedSession);
       const exercise = savedSession.savedExercises.find(savedExercise => {
         const exId = savedExercise.exerciseId;
+        console.log('Comparing IDs:', exId, exerciseId);
         return exId?.toString() === exerciseId?.toString();
       });
       
-      if (!exercise) return null;
-    
-      const avgReps = exercise.repSets.reduce((sum, set) => sum + set.repetitions, 0) / exercise.repSets.length;
-      const avgWeight = exercise.repSets.reduce((sum, set) => sum + set.weight, 0) / exercise.repSets.length;
-    
-      return {
+      if (!exercise) {
+        console.log('Exercise not found in session');
+        return null;
+      }
+      
+      console.log('Found exercise:', exercise);
+      const avgReps = exercise.savedRepSets.reduce((sum, set) => sum + set.repetitions, 0) / exercise.savedRepSets?.length;
+      const avgWeight = exercise.savedRepSets.reduce((sum, set) => sum + set.weight, 0) / exercise.savedRepSets?.length;
+      
+      const result = {
         date: new Date(savedSession.performedAt).toLocaleDateString(),
         reps: Math.round(avgReps),
         weight: Math.round(avgWeight)
       };
+      console.log('Prepared data point:', result);
+      return result;
     }).filter(Boolean);
+    
+    console.log('Final history for exercise:', history);
+    return history;
   };
 
   interface Session {
-    exercises: Array<{
-      repSets: Array<{
+    savedExercises: Array<{
+      savedRepSets: Array<{
         weight: number;
         repetitions: number;
       }>;
@@ -70,8 +83,9 @@ const Recapitulatif = () => {
     const currentSession = savedSessionData;
   
     const totalVolume = (session: Session) => 
-      session.exercises.reduce((acc, ex) => 
-        acc + ex.repSets.reduce((setAcc, set) => setAcc + (set.weight * set.repetitions), 0), 0);
+      session.savedExercises.reduce((acc, ex) => 
+        acc + ex.savedRepSets.reduce((setAcc: number, set: { weight: number; repetitions: number }) => 
+          setAcc + (set.weight * set.repetitions), 0), 0);
   
     const currentVolume = totalVolume(currentSession);
     const previousVolume = totalVolume(previousSession);
@@ -106,12 +120,12 @@ const Recapitulatif = () => {
       <TileContainer>
         <Tile
           title="Exercices"
-          value={savedSessionData?.exercises.length}
+          value={savedSessionData?.savedExercises?.length}
           icon="performance"
         />
         <Tile
           title="Séries totales"
-          value={savedSessionData?.exercises.reduce((acc: number, ex: Exercise) => acc + ex.repSets.length, 0)}
+          value={savedSessionData?.savedExercises?.reduce((acc: number, ex: { repSets: Array<{ weight: number; repetitions: number }> }) => acc + ex.repSets?.length, 0)}
           icon="stats"
         />
         <Tile
@@ -147,7 +161,7 @@ const Recapitulatif = () => {
 
       <div className={styles.exerciseCharts}>
         <h2>Progression par exercice</h2>
-        {savedSessionData?.exercises.map((exercise: SavedExercise) => (
+        {savedSessionData?.savedExercises?.map((exercise: SavedExercise) => (
           <ExerciseChart
             key={exercise.exerciseId}
             name={exercise.name}
