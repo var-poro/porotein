@@ -12,10 +12,47 @@ type Props = {
 };
 
 const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
-  const [isRunning, setIsRunning] = useState(true); // Start running by default
+  const [isRunning, setIsRunning] = useState(true);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  // Restaurer l'état du timer au chargement
+  useEffect(() => {
+    const savedTimer = localStorage.getItem('timer_state');
+    if (savedTimer) {
+      const { savedSeconds, savedStartTime, wasRunning } = JSON.parse(savedTimer);
+      if (savedSeconds && savedStartTime) {
+        const elapsedTime = Math.floor(
+          (Date.now() - new Date(savedStartTime).getTime()) / 1000
+        );
+        const remainingTime = savedSeconds - elapsedTime;
+        if (remainingTime > 0) {
+          setSeconds(remainingTime);
+          setStartTime(new Date(savedStartTime));
+          setIsRunning(wasRunning);
+        } else {
+          localStorage.removeItem('timer_state');
+        }
+      }
+    }
+  }, []);
+
+  // Sauvegarder l'état du timer
+  useEffect(() => {
+    if (isRunning && startTime) {
+      localStorage.setItem(
+        'timer_state',
+        JSON.stringify({
+          savedSeconds: seconds,
+          savedStartTime: startTime.toISOString(),
+          wasRunning: isRunning
+        })
+      );
+    } else if (!isRunning) {
+      localStorage.removeItem('timer_state');
+    }
+  }, [isRunning, startTime, seconds]);
 
   useEffect(() => {
     const checkNotificationPermission = async () => {
@@ -45,7 +82,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
           clearInterval(interval);
           setIsRunning(false);
           setSeconds(0);
-          // Envoyer une notification quand le timer est terminé
+          localStorage.removeItem('timer_state');
           if (notificationsEnabled) {
             sendNotification('Temps de repos terminé ! 💪', {
               body: 'C\'est reparti pour une nouvelle série !',
@@ -69,8 +106,12 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
       clearInterval(intervalId);
     }
 
-    return () => clearInterval(interval);
-  }, [isRunning, startTime]);
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isRunning, startTime, seconds, notificationsEnabled]);
 
   const handleStart = () => {
     if (!isRunning) {
@@ -82,6 +123,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
   const handlePause = () => {
     if (isRunning) {
       setIsRunning(false);
+      localStorage.removeItem('timer_state');
     }
   };
 
@@ -89,6 +131,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
     setIsRunning(false);
     setSeconds(defaultValue);
     setStartTime(null);
+    localStorage.removeItem('timer_state');
   };
 
   const convertSecondsToTime = (seconds: number) => {
