@@ -1,10 +1,14 @@
 {
   "devDependencies": {
+    "@types/web-push": "^3.6.4",
     "concurrently": "^9.1.2"
   },
   "scripts": {
     "dev:api": "pnpm --filter api dev --host",
     "dev:app": "pnpm --filter app dev --host",
     "dev": "concurrently \"pnpm run dev:api\" \"pnpm run dev:app\""
+  },
+  "dependencies": {
+    "web-push": "^3.6.7"
   }
 }

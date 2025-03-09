@@ -11,6 +11,7 @@ import programRoutes from './routes/programRoutes';
 import tagRoutes from './routes/tagRoutes';
 import muscleRoutes from './routes/muscleRoutes';
 import notificationRoutes from './routes/notificationRoutes';
+import pushRoutes from './routes/pushRoutes';
 import authRoutes from './routes/authRoutes';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
@@ -48,15 +49,16 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
-app.use('/programs', programRoutes);
 app.use('/sessions', sessionRoutes);
 app.use('/exercises', exerciseRoutes);
 app.use('/saved-sessions', savedSessionRoutes);
 app.use('/saved-exercises', savedExerciseRoutes);
+app.use('/supplements', supplementRoutes);
+app.use('/programs', programRoutes);
 app.use('/tags', tagRoutes);
 app.use('/muscles', muscleRoutes);
 app.use('/notifications', notificationRoutes);
-app.use('/supplements', supplementRoutes);
+app.use('/push', pushRoutes);
 app.use('/api/weight', weightRoutes);
 
 app.listen(PORT, () => {
