@@ -21,6 +21,11 @@ jobs:
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no deploy@195.200.15.145 << 'EOF'
+          # Activer le mode d'erreur strict pour arrêter le script en cas d'erreur
+          set -e
+
+          echo "🚀 Démarrage du déploiement..."
+
           # Charger nvm
           export NVM_DIR="$HOME/.nvm"
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -30,21 +35,61 @@ jobs:
           nvm use node
 
           # Vérifier que pnpm et pm2 sont disponibles
-          which pnpm
-          which pm2
+          which pnpm || { echo "❌ pnpm n'est pas installé"; exit 1; }
+          which pm2 || { echo "❌ pm2 n'est pas installé"; exit 1; }
 
+          echo "📂 Mise à jour du code source..."
           cd /var/www/porotein
           git pull
 
+          echo "🔧 Construction de l'application frontend..."
           cd /var/www/porotein/app
           pnpm install
           pnpm build
 
+          echo "🔧 Construction de l'API backend..."
           cd /var/www/porotein/api
           pnpm install
           pnpm build
 
+          # Vérifier les variables d'environnement VAPID
+          echo "🔑 Vérification des variables d'environnement VAPID..."
+          if ! grep -q "VAPID_PUBLIC_KEY" .env; then
+            echo "❌ VAPID_PUBLIC_KEY n'est pas configuré dans le fichier .env"
+            exit 1
+          fi
+          
+          if ! grep -q "VAPID_PRIVATE_KEY" .env; then
+            echo "❌ VAPID_PRIVATE_KEY n'est pas configuré dans le fichier .env"
+            exit 1
+          fi
+          
+          if ! grep -q "VAPID_EMAIL" .env; then
+            echo "❌ VAPID_EMAIL n'est pas configuré dans le fichier .env"
+            exit 1
+          fi
+
+          echo "🔄 Redémarrage des services..."
+          # Arrêter les services existants
+          pm2 stop all || true
+          
+          # Démarrer les services avec la nouvelle configuration
           pm2 start ecosystem.config.js --env production
 
-          # Vérification de l'état des processus PM2
+          # Sauvegarder la configuration PM2 pour qu'elle persiste après un redémarrage du serveur
+          pm2 save
+
+          echo "✅ Vérification de l'état des processus PM2..."
           pm2 status
+
+          # Vérifier que l'API répond correctement
+          echo "🔍 Vérification de l'API..."
+          curl -s -o /dev/null -w "%{http_code}" https://api.porotein.fr/ || {
+            echo "❌ L'API ne répond pas correctement"
+            echo "📋 Logs de l'API:"
+            pm2 logs api --lines 50
+            exit 1
+          }
+
+          echo "✅ Déploiement terminé avec succès!"
+EOF
