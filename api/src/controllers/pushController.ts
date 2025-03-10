@@ -6,12 +6,15 @@ interface AuthRequest extends Request {
     userId?: string;
 }
 
-// Configuration de web-push avec les clés VAPID
-webpush.setVapidDetails(
-    'mailto:your-email@example.com', // Remplacez par votre email
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-    process.env.VAPID_PRIVATE_KEY!
-);
+interface PushNotificationOptions {
+    body?: string;
+    icon?: string;
+    badge?: string;
+    vibrate?: number[];
+    tag?: string;
+    renotify?: boolean;
+    data?: any;
+}
 
 export const subscribe = async (req: AuthRequest, res: Response) => {
     try {
@@ -48,7 +51,7 @@ export const unsubscribe = async (req: AuthRequest, res: Response) => {
 export const sendPushNotification = async (
     userId: string,
     title: string,
-    options: webpush.NotificationOptions = {}
+    options: PushNotificationOptions = {}
 ) => {
     try {
         const subscriptions = await PushSubscription.find({ userId });
