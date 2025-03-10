@@ -7,4 +7,5 @@ export { default as Statistics } from './Statistics/Statistics';
 export { default as Loading } from './Loading/Loading';
 export { default as Modal } from './Modal/Modal.tsx';
 export { default as TagSelector } from './TagSelector/TagSelector';
+export { default as IOSNotificationBanner } from './IOSNotificationBanner/IOSNotificationBanner.tsx';
 export { default as Difficulty } from './Difficulty/Difficulty';

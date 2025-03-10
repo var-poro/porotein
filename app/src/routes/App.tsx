@@ -18,6 +18,7 @@ import TagManager from '@/pages/Tag/TagManager.tsx';
 import ActiveSession from '@/pages/ActiveSession/ActiveSession.tsx';
 import Recapitulatif from '@/pages/ActiveSession/Recapitulatif.tsx';
 import AppStateHandler from '@/components/AppStateHandler/AppStateHandler.tsx';
+import IOSNotificationBanner from '@/components/IOSNotificationBanner/IOSNotificationBanner.tsx';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
       <Router>
         <ScrollToTop />
         <AppStateHandler />
+        <IOSNotificationBanner />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

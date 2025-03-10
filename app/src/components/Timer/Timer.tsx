@@ -125,22 +125,15 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
           setIsRunning(false);
           setSeconds(0);
           localStorage.removeItem('timer_state');
-          if (notificationsEnabled) {
-            sendNotification('Temps de repos terminé ! 💪', {
-              body: 'C\'est reparti pour une nouvelle série !',
-              requireInteraction: true,
-              playSound: !isMuted
-            });
-            if ('vibrate' in navigator) {
-              navigator.vibrate([200, 100, 200]);
-            }
-          }
+          
+          // Envoyer une notification lorsque le timer est terminé
+          sendNotification('Temps de repos terminé ! 💪', {
+            body: 'C\'est reparti pour une nouvelle série !',
+            requireInteraction: true,
+            playSound: !isMuted
+          });
         } else {
           setSeconds(remainingTime);
-          // Vibrer quand il reste 5 secondes ou moins
-          if (remainingTime <= 5 && 'vibrate' in navigator) {
-            navigator.vibrate(200);
-          }
         }
       }, 100); // Intervalle plus court pour une mise à jour plus fluide
 
