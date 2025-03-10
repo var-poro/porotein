@@ -52,23 +52,6 @@ jobs:
           pnpm install
           pnpm build
 
-          # Vérifier les variables d'environnement VAPID
-          echo "🔑 Vérification des variables d'environnement VAPID..."
-          if ! grep -q "VAPID_PUBLIC_KEY" .env; then
-            echo "❌ VAPID_PUBLIC_KEY n'est pas configuré dans le fichier .env"
-            exit 1
-          fi
-          
-          if ! grep -q "VAPID_PRIVATE_KEY" .env; then
-            echo "❌ VAPID_PRIVATE_KEY n'est pas configuré dans le fichier .env"
-            exit 1
-          fi
-          
-          if ! grep -q "VAPID_EMAIL" .env; then
-            echo "❌ VAPID_EMAIL n'est pas configuré dans le fichier .env"
-            exit 1
-          fi
-
           echo "🔄 Redémarrage des services..."
           # Arrêter les services existants
           pm2 stop all || true
