@@ -9,6 +9,7 @@ self.addEventListener('install', (event) => {
       // Mise en cache des assets essentiels
       return cache.addAll([
         '/',
+        '/assets/Positive Notification Sound.mp3',
         '/assets/notification.mp3',
         '/android/android-launchericon-192-192.png'
       ]);
@@ -52,9 +53,19 @@ self.addEventListener('push', (event) => {
           body: data.body || '',
           icon: '/android/android-launchericon-192-192.png',
           badge: '/android/android-launchericon-192-192.png',
-          vibrate: [200, 100, 200],
           tag: data.tag || 'default',
           renotify: true,
+          requireInteraction: true,
+          actions: [
+            {
+              action: 'open',
+              title: 'Ouvrir l\'application'
+            },
+            {
+              action: 'close',
+              title: 'Fermer'
+            }
+          ],
           data: data.data || {}
         })
       );
@@ -67,8 +78,17 @@ self.addEventListener('push', (event) => {
 // Gestion du clic sur les notifications
 self.addEventListener('notificationclick', (event) => {
   console.log('[Service Worker] Notification cliquée', event);
+  
+  // Fermer la notification
   event.notification.close();
-
+  
+  // Gérer les actions spécifiques
+  if (event.action === 'close') {
+    console.log('[Service Worker] Notification fermée par l\'utilisateur');
+    return;
+  }
+  
+  // Action par défaut ou action 'open'
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
