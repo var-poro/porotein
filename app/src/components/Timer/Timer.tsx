@@ -4,7 +4,6 @@ import { PiPauseBold, PiTriangleBold } from 'react-icons/pi';
 import { GrPowerReset } from 'react-icons/gr';
 import { IoWaterOutline } from 'react-icons/io5';
 import { IoVolumeMuteOutline, IoVolumeHighOutline } from 'react-icons/io5';
-import { requestNotificationPermission, sendNotification } from '@/services/notificationService';
 
 type Props = {
   seconds: number;
@@ -16,9 +15,22 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
   const [isRunning, setIsRunning] = useState(true);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [timerKey, setTimerKey] = useState(Date.now()); // Clé pour forcer le re-rendu
   const [isMuted, setIsMuted] = useState(false);
+
+  // Fonction pour jouer un son de notification
+  const playSound = (isLoud = false) => {
+    try {
+      console.log('Lecture du son de notification');
+      const audio = new Audio('/assets/Positive Notification Sound.mp3');
+      audio.volume = isLoud ? 1.0 : 0.7;
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture du son:', error);
+      });
+    } catch (error) {
+      console.error('Erreur lors de la lecture du son:', error);
+    }
+  };
 
   // Restaurer l'état du timer au chargement
   useEffect(() => {
@@ -97,14 +109,6 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
   }, []);
 
   useEffect(() => {
-    const checkNotificationPermission = async () => {
-      const granted = await requestNotificationPermission();
-      setNotificationsEnabled(granted);
-    };
-    checkNotificationPermission();
-  }, []);
-
-  useEffect(() => {
     let interval: NodeJS.Timeout;
 
     if (isRunning) {
@@ -126,12 +130,10 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
           setSeconds(0);
           localStorage.removeItem('timer_state');
           
-          // Envoyer une notification lorsque le timer est terminé
-          sendNotification('Temps de repos terminé ! 💪', {
-            body: 'C\'est reparti pour une nouvelle série !',
-            requireInteraction: true,
-            playSound: !isMuted
-          });
+          // Jouer un son lorsque le timer est terminé
+          if (!isMuted) {
+            playSound(true);
+          }
         } else {
           setSeconds(remainingTime);
         }
@@ -147,7 +149,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
         clearInterval(interval);
       }
     };
-  }, [isRunning, startTime, notificationsEnabled, timerKey, isMuted]);
+  }, [isRunning, startTime, timerKey, isMuted]);
 
   const handleStart = () => {
     if (!isRunning) {

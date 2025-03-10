@@ -9,8 +9,6 @@ self.addEventListener('install', (event) => {
       // Mise en cache des assets essentiels
       return cache.addAll([
         '/',
-        '/assets/Positive Notification Sound.mp3',
-        '/assets/notification.mp3',
         '/android/android-launchericon-192-192.png'
       ]);
     })
@@ -39,78 +37,10 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Gestion des notifications push
-self.addEventListener('push', (event) => {
-  console.log('[Service Worker] Notification push reçue', event);
-  
-  if (event.data) {
-    try {
-      const data = event.data.json();
-      console.log('[Service Worker] Données de notification:', data);
-      
-      event.waitUntil(
-        self.registration.showNotification(data.title || 'Notification', {
-          body: data.body || '',
-          icon: '/android/android-launchericon-192-192.png',
-          badge: '/android/android-launchericon-192-192.png',
-          tag: data.tag || 'default',
-          renotify: true,
-          requireInteraction: true,
-          actions: [
-            {
-              action: 'open',
-              title: 'Ouvrir l\'application'
-            },
-            {
-              action: 'close',
-              title: 'Fermer'
-            }
-          ],
-          data: data.data || {}
-        })
-      );
-    } catch (error) {
-      console.error('[Service Worker] Erreur lors du traitement de la notification push:', error);
-    }
-  }
-});
-
-// Gestion du clic sur les notifications
-self.addEventListener('notificationclick', (event) => {
-  console.log('[Service Worker] Notification cliquée', event);
-  
-  // Fermer la notification
-  event.notification.close();
-  
-  // Gérer les actions spécifiques
-  if (event.action === 'close') {
-    console.log('[Service Worker] Notification fermée par l\'utilisateur');
-    return;
-  }
-  
-  // Action par défaut ou action 'open'
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then((clientList) => {
-        // Si une fenêtre est déjà ouverte, on la focus
-        for (const client of clientList) {
-          if (client.url.includes(self.registration.scope) && 'focus' in client) {
-            return client.focus();
-          }
-        }
-        // Sinon on ouvre une nouvelle fenêtre
-        if (self.clients.openWindow) {
-          return self.clients.openWindow('/');
-        }
-        return null;
-      })
-  );
-});
-
 // Stratégie de cache pour les requêtes
 self.addEventListener('fetch', (event) => {
   // Ne pas intercepter les requêtes vers l'API
-  if (event.request.url.includes('/api/') || event.request.url.includes('/push/')) {
+  if (event.request.url.includes('/api/')) {
     return;
   }
   
