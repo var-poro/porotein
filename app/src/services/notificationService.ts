@@ -6,6 +6,7 @@ interface PWANotificationOptions extends NotificationOptions {
   vibrate?: number[];
   tag?: string;
   renotify?: boolean;
+  playSound?: boolean; // Option pour jouer ou non le son
 }
 
 // Vérifie si le navigateur supporte les notifications
@@ -31,7 +32,14 @@ const isIOS = () => {
 // Enregistre le service worker pour les notifications
 const registerServiceWorker = async () => {
   try {
-    const registration = await navigator.serviceWorker.register('/service-worker.js');
+    console.log('Tentative d\'enregistrement du service worker...');
+    
+    // En mode développement, utiliser le service worker de développement
+    const swPath = import.meta.env.DEV ? '/dev-sw.js' : '/sw.js';
+    console.log(`Utilisation du service worker: ${swPath}`);
+    
+    const registration = await navigator.serviceWorker.register(swPath);
+    console.log('Service worker enregistré avec succès:', registration);
     return registration;
   } catch (error) {
     console.error('Erreur lors de l\'enregistrement du service worker:', error);
@@ -54,17 +62,21 @@ export const requestNotificationPermission = async () => {
 
     // Demande la permission
     const permission = await window.Notification.requestPermission();
+    console.log('Permission de notification:', permission);
     
     // Si la permission est accordée, on souscrit aux notifications push
     if (permission === 'granted') {
       try {
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-        });
-        
-        // Envoie la subscription au serveur
-        await apiClient.post('/notifications/subscribe', subscription);
+        // En mode développement, on ne s'abonne pas aux notifications push
+        if (!import.meta.env.DEV) {
+          const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: window.atob(import.meta.env.VITE_VAPID_PUBLIC_KEY || '')
+          });
+          
+          // Envoie la subscription au serveur
+          await apiClient.post('/push/subscribe', subscription);
+        }
       } catch (error) {
         console.error('Erreur lors de la souscription aux notifications push:', error);
       }
@@ -80,7 +92,9 @@ export const requestNotificationPermission = async () => {
 export const sendNotification = async (title: string, options?: PWANotificationOptions) => {
   if (!checkNotificationSupport() || window.Notification.permission !== 'granted') {
     // Fallback pour iOS et navigateurs non supportés
-    playNotificationSound();
+    if (options?.playSound !== false) {
+      playNotificationSound();
+    }
     if ('vibrate' in navigator) {
       navigator.vibrate([200, 100, 200]);
     }
@@ -88,27 +102,42 @@ export const sendNotification = async (title: string, options?: PWANotificationO
   }
 
   try {
+    console.log('Tentative d\'envoi de notification via service worker');
     const registration = await navigator.serviceWorker.ready;
+    console.log('Service worker prêt:', registration);
     
     // Utilise le service worker pour envoyer la notification
     await registration.showNotification(title, {
       icon: '/android/android-launchericon-192-192.png',
       badge: '/android/android-launchericon-192-192.png',
-      vibrate: [200, 100, 200],
       tag: 'timer-notification', // Pour regrouper les notifications similaires
       renotify: true, // Pour permettre plusieurs notifications avec le même tag
       ...options
     } as PWANotificationOptions);
+    console.log('Notification envoyée avec succès');
+    
+    // Jouer le son si l'option n'est pas désactivée
+    if (options?.playSound !== false) {
+      playNotificationSound();
+    }
   } catch (error) {
     console.error('Erreur lors de l\'envoi de la notification:', error);
     
     // Fallback vers les notifications natives si le service worker échoue
     try {
-      return new window.Notification(title, {
+      console.log('Tentative de fallback vers les notifications natives');
+      const notification = new window.Notification(title, {
         icon: '/android/android-launchericon-192-192.png',
         badge: '/android/android-launchericon-192-192.png',
         ...options
       });
+      
+      // Jouer le son si l'option n'est pas désactivée
+      if (options?.playSound !== false) {
+        playNotificationSound();
+      }
+      
+      return notification;
     } catch (fallbackError) {
       console.error('Erreur lors du fallback de notification:', fallbackError);
     }
@@ -116,7 +145,7 @@ export const sendNotification = async (title: string, options?: PWANotificationO
 };
 
 // Joue un son de notification
-const playNotificationSound = () => {
+export const playNotificationSound = () => {
   const audio = new Audio('/assets/notification.mp3');
   audio.play().catch(error => console.log('Erreur lors de la lecture du son:', error));
 };

@@ -17,12 +17,14 @@ import MuscleManager from '@/pages/Muscle/MuscleManager.tsx';
 import TagManager from '@/pages/Tag/TagManager.tsx';
 import ActiveSession from '@/pages/ActiveSession/ActiveSession.tsx';
 import Recapitulatif from '@/pages/ActiveSession/Recapitulatif.tsx';
+import AppStateHandler from '@/components/AppStateHandler/AppStateHandler.tsx';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <ScrollToTop />
+        <AppStateHandler />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

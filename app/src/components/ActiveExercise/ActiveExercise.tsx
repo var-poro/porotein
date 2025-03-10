@@ -15,9 +15,11 @@ import { useLocalStorage } from '@/utils/useLocalStorage.ts';
 type Props = {
   exercise: Exercise;
   nextExercise: () => void;
+  previousExercise: () => void;
+  hasPrevious: boolean;
 };
 
-const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
+const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, hasPrevious }) => {
   const [exerciseStarted, setExerciseStarted] = useState(false);
   const [repSetIsDone, setRepSetIsDone] = useState(false);
   const [currentSeriesIndex, setCurrentSeriesIndex] = useState(0);
@@ -41,6 +43,49 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
       return data;
     }
   );
+
+  // Restaurer l'état de l'exercice au chargement
+  useEffect(() => {
+    const savedState = localStorage.getItem(`exerciseState_${exercise._id}`);
+    if (savedState) {
+      try {
+        const state = JSON.parse(savedState);
+        console.log(`Restauration de l'état de l'exercice ${exercise._id}:`, state);
+        setExerciseStarted(state.exerciseStarted || false);
+        setRepSetIsDone(state.repSetIsDone || false);
+        setCurrentSeriesIndex(state.currentSeriesIndex || 0);
+        setIsCollapsed(state.isCollapsed || false);
+      } catch (error) {
+        console.error(`Erreur lors de la restauration de l'état de l'exercice ${exercise._id}:`, error);
+        localStorage.removeItem(`exerciseState_${exercise._id}`);
+      }
+    }
+  }, [exercise._id]);
+
+  // Gérer les changements de visibilité
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        // L'application est mise en arrière-plan
+        console.log(`Exercice ${exercise._id}: Application mise en arrière-plan`);
+        // Sauvegarder l'état de l'exercice
+        const state = {
+          exerciseStarted,
+          repSetIsDone,
+          currentSeriesIndex,
+          isCollapsed
+        };
+        localStorage.setItem(`exerciseState_${exercise._id}`, JSON.stringify(state));
+        console.log(`État de l'exercice ${exercise._id} sauvegardé:`, state);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [exercise._id, exerciseStarted, repSetIsDone, currentSeriesIndex, isCollapsed]);
 
   const saveExerciseToLocal = () => {
     const savedSession = JSON.parse(
@@ -72,6 +117,15 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
     };
   
     localStorage.setItem('activeSession', JSON.stringify(updatedSession));
+    
+    // Sauvegarder également l'état de l'exercice
+    const state = {
+      exerciseStarted,
+      repSetIsDone,
+      currentSeriesIndex,
+      isCollapsed
+    };
+    localStorage.setItem(`exerciseState_${exercise._id}`, JSON.stringify(state));
   };
 
   const handleNextRepSet = () => {
@@ -80,6 +134,16 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
     } else {
       setRepSetIsDone(false);
       setCurrentSeriesIndex(currentSeriesIndex + 1);
+    }
+    saveExerciseToLocal();
+  };
+
+  const handlePreviousRepSet = () => {
+    if (repSetIsDone) {
+      setRepSetIsDone(false);
+    } else if (currentSeriesIndex > 0) {
+      setCurrentSeriesIndex(currentSeriesIndex - 1);
+      setRepSetIsDone(true);
     }
     saveExerciseToLocal();
   };
@@ -95,12 +159,15 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
   };
 
   useEffect(() => {
-    setCurrentSeriesIndex(0);
-    setExerciseStarted(false);
-    setRepSetIsDone(false);
-    setIsCollapsed(false);
-    setVideoLoaded(false);
-    setRepSets(exercise.repSets);
+    // Ne pas réinitialiser l'état si nous avons déjà un état sauvegardé
+    if (!localStorage.getItem(`exerciseState_${exercise._id}`)) {
+      setCurrentSeriesIndex(0);
+      setExerciseStarted(false);
+      setRepSetIsDone(false);
+      setIsCollapsed(false);
+      setVideoLoaded(false);
+      setRepSets(exercise.repSets);
+    }
   }, [exercise]);
 
   useEffect(() => {
@@ -143,7 +210,12 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
         {!exerciseStarted && (
           <div className={styles.buttonsContainer}>
             <button onClick={handleStartExercise}>Démarrer</button>
-            <span onClick={nextExercise}>Passer l'exercice</span>
+            <div className={styles.navigationButtons}>
+              {hasPrevious && (
+                <span onClick={previousExercise}>Exercice précédent</span>
+              )}
+              <span onClick={nextExercise}>Passer l'exercice</span>
+            </div>
           </div>
         )}
         <h5>Muscles</h5>
@@ -221,11 +293,23 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise }) => {
             </>
           )}
           <div className={styles.buttonsContainer}>
-            {currentSeriesIndex + 1 !== exercise.repSets.length ? (
-              <button onClick={handleNextRepSet}>Suivant</button>
-            ) : (
-              <button onClick={nextExercise}>Terminer l'exercice</button>
-            )}
+            <div className={styles.repSetNavigation}>
+              {(currentSeriesIndex > 0 || repSetIsDone) && (
+                <button onClick={handlePreviousRepSet}>Précédent</button>
+              )}
+              {currentSeriesIndex + 1 !== exercise.repSets.length || !repSetIsDone ? (
+                <button onClick={handleNextRepSet}>Suivant</button>
+              ) : (
+                <button onClick={nextExercise}>Terminer l'exercice</button>
+              )}
+            </div>
+            <div className={styles.exerciseNavigation}>
+              {hasPrevious && (
+                <button onClick={previousExercise} className={styles.previousExerciseBtn}>
+                  Exercice précédent
+                </button>
+              )}
+            </div>
           </div>
         </>
       )}
