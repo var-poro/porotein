@@ -9,6 +9,22 @@ interface PWANotificationOptions extends NotificationOptions {
   playSound?: boolean; // Option pour jouer ou non le son
 }
 
+// Fonction pour convertir une clé VAPID en Uint8Array
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+  
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 // Vérifie si le navigateur supporte les notifications
 const checkNotificationSupport = () => {
   return 'Notification' in window && 
@@ -34,8 +50,8 @@ const registerServiceWorker = async () => {
   try {
     console.log('Tentative d\'enregistrement du service worker...');
     
-    // En mode développement, utiliser le service worker de développement
-    const swPath = import.meta.env.DEV ? '/dev-sw.js' : '/sw.js';
+    // Utiliser le même service worker pour le développement et la production
+    const swPath = '/sw.js';
     console.log(`Utilisation du service worker: ${swPath}`);
     
     const registration = await navigator.serviceWorker.register(swPath);
@@ -67,16 +83,29 @@ export const requestNotificationPermission = async () => {
     // Si la permission est accordée, on souscrit aux notifications push
     if (permission === 'granted') {
       try {
-        // En mode développement, on ne s'abonne pas aux notifications push
-        if (!import.meta.env.DEV) {
-          const subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: window.atob(import.meta.env.VITE_VAPID_PUBLIC_KEY || '')
-          });
-          
-          // Envoie la subscription au serveur
-          await apiClient.post('/push/subscribe', subscription);
+        // Vérifier si la clé VAPID est disponible
+        const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+        if (!vapidPublicKey) {
+          console.error('Clé VAPID publique non disponible');
+          return permission === 'granted';
         }
+
+        console.log('Tentative de souscription aux notifications push');
+        
+        // Convertir la clé VAPID en Uint8Array
+        const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
+        
+        // Souscrire aux notifications push
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey
+        });
+        
+        console.log('Souscription aux notifications push réussie:', subscription);
+        
+        // Envoie la subscription au serveur
+        await apiClient.post('/push/subscribe', subscription);
+        console.log('Souscription envoyée au serveur');
       } catch (error) {
         console.error('Erreur lors de la souscription aux notifications push:', error);
       }

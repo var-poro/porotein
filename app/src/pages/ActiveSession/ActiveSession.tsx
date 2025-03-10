@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { getSessionById } from '@/services/sessionService.ts';
 import { saveSession } from '@/services/savedSessionService.ts';
@@ -19,6 +19,7 @@ const ActiveSession = () => {
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { data: sessionData, isLoading: sessionLoading } = useQuery(
     ['session', id],
@@ -26,24 +27,27 @@ const ActiveSession = () => {
     { enabled: !!id }
   );
 
-  // Restaurer l'état de la session au chargement
+  // Restaurer l'état de la session au chargement uniquement si nous sommes sur la page de session active
   useEffect(() => {
-    const savedState = localStorage.getItem(ACTIVE_SESSION_STATE_KEY);
-    if (savedState && id) {
-      try {
-        const state = JSON.parse(savedState);
-        if (state.sessionId === id) {
-          console.log('Restauration de l\'état de la session active:', state);
-          setExerciseIndex(state.exerciseIndex || 0);
-          setSessionStartTime(state.sessionStartTime || Date.now());
-          setExerciseStartTime(state.exerciseStartTime || Date.now());
+    // Vérifier si nous sommes sur la page de session active
+    if (location.pathname.includes(`/workout/${id}`)) {
+      const savedState = localStorage.getItem(ACTIVE_SESSION_STATE_KEY);
+      if (savedState && id) {
+        try {
+          const state = JSON.parse(savedState);
+          if (state.sessionId === id) {
+            console.log('Restauration de l\'état de la session active:', state);
+            setExerciseIndex(state.exerciseIndex || 0);
+            setSessionStartTime(state.sessionStartTime || Date.now());
+            setExerciseStartTime(state.exerciseStartTime || Date.now());
+          }
+        } catch (error) {
+          console.error('Erreur lors de la restauration de l\'état de la session:', error);
+          localStorage.removeItem(ACTIVE_SESSION_STATE_KEY);
         }
-      } catch (error) {
-        console.error('Erreur lors de la restauration de l\'état de la session:', error);
-        localStorage.removeItem(ACTIVE_SESSION_STATE_KEY);
       }
     }
-  }, [id]);
+  }, [id, location.pathname]);
 
   // Gérer les changements de visibilité
   useEffect(() => {
@@ -62,11 +66,8 @@ const ActiveSession = () => {
           localStorage.setItem(ACTIVE_SESSION_STATE_KEY, JSON.stringify(state));
           console.log('État de la session sauvegardé:', state);
         }
-      } else if (document.visibilityState === 'visible') {
-        // L'application est remise au premier plan
-        console.log('Session active: Application remise au premier plan');
-        // La restauration est gérée au chargement initial
       }
+      // Nous ne restaurons plus automatiquement l'état lorsque l'application est remise au premier plan
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
