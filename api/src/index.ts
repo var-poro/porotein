@@ -11,13 +11,11 @@ import programRoutes from './routes/programRoutes';
 import tagRoutes from './routes/tagRoutes';
 import muscleRoutes from './routes/muscleRoutes';
 import notificationRoutes from './routes/notificationRoutes';
-import pushRoutes from './routes/pushRoutes';
 import authRoutes from './routes/authRoutes';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from "node:path";
 import weightRoutes from './routes/weightRoutes';
-import { configureVapid } from './config/vapid';
 
 try {
     // Résolution du chemin du fichier .env
@@ -41,10 +39,7 @@ try {
     console.log('Variables d\'environnement chargées avec succès');
     console.log('Variables disponibles:', {
         jwtSecret: !!process.env.JWT_SECRET,
-        jwtRefreshSecret: !!process.env.JWT_REFRESH_SECRET,
-        vapidPublicKey: !!process.env.VAPID_PUBLIC_KEY,
-        vapidPrivateKey: !!process.env.VAPID_PRIVATE_KEY,
-        vapidEmail: !!process.env.VAPID_EMAIL
+        jwtRefreshSecret: !!process.env.JWT_REFRESH_SECRET
     });
 
     // Vérifier les variables d'environnement requises
@@ -55,9 +50,6 @@ try {
             process.exit(1);
         }
     }
-
-    // Configurer VAPID pour les notifications push
-    configureVapid();
 
     const app = express();
     const PORT = process.env.PORT || 4000;
@@ -97,7 +89,6 @@ try {
     app.use('/tags', tagRoutes);
     app.use('/muscles', muscleRoutes);
     app.use('/notifications', notificationRoutes);
-    app.use('/push', pushRoutes);
     app.use('/api/weight', weightRoutes);
 
     app.listen(PORT, () => {
