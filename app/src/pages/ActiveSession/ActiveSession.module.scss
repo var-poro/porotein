@@ -8,4 +8,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+.navigationInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  margin: calc(var(--spacing) / 2) 0;
+}
+
+.previousExercise, .nextExercise {
+  color: var(--text-color-light);
+  font-style: italic;
+  margin: 2px 0;
 }

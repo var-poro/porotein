@@ -12,17 +12,14 @@ export default defineConfig({
   },
   plugins: [react(),
     VitePWA({
-      // Utilisation du mode injectManifest pour avoir un service worker personnalisé
-      strategies: 'injectManifest',
-      srcDir: 'src',
-      filename: 'sw.ts', // Fichier du service worker
-      // Le service worker se met à jour automatiquement quand une nouvelle version est disponible
+      // Utilisation du mode generateSW pour générer un service worker
+      strategies: 'generateSW',
       registerType: 'autoUpdate',
       // Définition du manifest pour l'installation sur l'écran d'accueil
       manifest: {
-        name: 'Nom de l\'application',
-        short_name: 'App',
-        description: 'Description de l\'application',
+        name: 'Porotein',
+        short_name: 'Porotein',
+        description: 'Application de suivi de fitness',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
@@ -45,6 +42,29 @@ export default defineConfig({
             purpose: 'any maskable',
           },
         ],
+      },
+      workbox: {
+        // Configuration de Workbox
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,mp3}'],
+        // Gestion des notifications push
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/api\.porotein\.fr\/.*$/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24, // 1 jour
+              },
+            },
+          },
+        ],
+      },
+      devOptions: {
+        // Options de développement
+        enabled: true,
+        type: 'module',
       },
     }),
   ],

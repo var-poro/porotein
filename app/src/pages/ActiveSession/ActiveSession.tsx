@@ -10,6 +10,8 @@ import ProgressBar from '@/components/ProgressBar/ProgressBar.tsx';
 import toast from 'react-hot-toast';
 import { Exercise, RepSet } from '@/types/Exercise';
 
+const ACTIVE_SESSION_STATE_KEY = 'activeSessionState';
+
 const ActiveSession = () => {
   const [currentProgress, setCurrentProgress] = useState(0);
   const [exerciseIndex, setExerciseIndex] = useState(0);
@@ -23,6 +25,56 @@ const ActiveSession = () => {
     () => getSessionById(id),
     { enabled: !!id }
   );
+
+  // Restaurer l'état de la session au chargement
+  useEffect(() => {
+    const savedState = localStorage.getItem(ACTIVE_SESSION_STATE_KEY);
+    if (savedState && id) {
+      try {
+        const state = JSON.parse(savedState);
+        if (state.sessionId === id) {
+          console.log('Restauration de l\'état de la session active:', state);
+          setExerciseIndex(state.exerciseIndex || 0);
+          setSessionStartTime(state.sessionStartTime || Date.now());
+          setExerciseStartTime(state.exerciseStartTime || Date.now());
+        }
+      } catch (error) {
+        console.error('Erreur lors de la restauration de l\'état de la session:', error);
+        localStorage.removeItem(ACTIVE_SESSION_STATE_KEY);
+      }
+    }
+  }, [id]);
+
+  // Gérer les changements de visibilité
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        // L'application est mise en arrière-plan
+        console.log('Session active: Application mise en arrière-plan');
+        // Sauvegarder l'état complet de la session
+        if (sessionData && id) {
+          const state = {
+            sessionId: id,
+            exerciseIndex,
+            sessionStartTime,
+            exerciseStartTime
+          };
+          localStorage.setItem(ACTIVE_SESSION_STATE_KEY, JSON.stringify(state));
+          console.log('État de la session sauvegardé:', state);
+        }
+      } else if (document.visibilityState === 'visible') {
+        // L'application est remise au premier plan
+        console.log('Session active: Application remise au premier plan');
+        // La restauration est gérée au chargement initial
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [id, exerciseIndex, sessionStartTime, exerciseStartTime, sessionData]);
 
   useEffect(() => {
     if (sessionData?.exercises?.length) {
@@ -66,6 +118,15 @@ const ActiveSession = () => {
       })),
     };
     localStorage.setItem('activeSession', JSON.stringify(updatedSessionData));
+    
+    // Sauvegarder également l'état de la session
+    const state = {
+      sessionId: id,
+      exerciseIndex,
+      sessionStartTime,
+      exerciseStartTime
+    };
+    localStorage.setItem(ACTIVE_SESSION_STATE_KEY, JSON.stringify(state));
   };
 
   const handleProgress = (newIndex: number) => {
@@ -90,10 +151,21 @@ const ActiveSession = () => {
         console.log({ savedSession });
         toast.success('Session sauvegardée avec succès !');
         localStorage.removeItem('activeSession');
+        localStorage.removeItem(ACTIVE_SESSION_STATE_KEY);
         if (savedSession._id) navigate(`/workout/${savedSession._id}/recap`, { state: { justFinished: true } });
       } catch (error) {
         toast.error('Erreur lors de la sauvegarde de la session.');
       }
+    }
+  };
+
+  const handlePreviousExercise = () => {
+    if (exerciseIndex > 0) {
+      handleProgress(exerciseIndex - 1);
+    } else {
+      toast('Vous êtes déjà au premier exercice', {
+        icon: '⚠️'
+      });
     }
   };
 
@@ -123,11 +195,18 @@ const ActiveSession = () => {
     <div className={styles.container}>
       <div className={styles.headerContainer}>
         <h5>{sessionData?.name}</h5>
-        {sessionData.exercises[exerciseIndex + 1] && (
-          <small>
-            À suivre : {sessionData.exercises[exerciseIndex + 1]?.name}
-          </small>
-        )}
+        <div className={styles.navigationInfo}>
+          {exerciseIndex > 0 && (
+            <small className={styles.previousExercise}>
+              Précédent : {sessionData.exercises[exerciseIndex - 1]?.name}
+            </small>
+          )}
+          {sessionData.exercises[exerciseIndex + 1] && (
+            <small className={styles.nextExercise}>
+              À suivre : {sessionData.exercises[exerciseIndex + 1]?.name}
+            </small>
+          )}
+        </div>
         <h5>
           {exerciseIndex + 1} / {sessionData.exercises.length}
         </h5>
@@ -139,6 +218,8 @@ const ActiveSession = () => {
       <ActiveExercise
         exercise={sessionData.exercises[exerciseIndex]}
         nextExercise={handleNextExercise}
+        previousExercise={handlePreviousExercise}
+        hasPrevious={exerciseIndex > 0}
       />
     </div>
   );
