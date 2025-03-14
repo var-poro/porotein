@@ -4,9 +4,9 @@
   "description": "Your personal fitness tracking app",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#000000",
-  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/android/android-launchericon-192-192.png",

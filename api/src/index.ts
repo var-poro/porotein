@@ -10,12 +10,13 @@ import userRoutes from './routes/userRoutes';
 import programRoutes from './routes/programRoutes';
 import tagRoutes from './routes/tagRoutes';
 import muscleRoutes from './routes/muscleRoutes';
-import notificationRoutes from './routes/notificationRoutes';
 import authRoutes from './routes/authRoutes';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from "node:path";
 import weightRoutes from './routes/weightRoutes';
+import swaggerSpec from './config/swagger';
+import fs from 'fs';
 
 try {
     // Résolution du chemin du fichier .env
@@ -70,12 +71,26 @@ try {
     // Middleware pour parser les cookies
     app.use(cookieParser());
 
+    // Servir les fichiers statiques du dossier public
+    app.use(express.static(path.join(__dirname, '..', 'public')));
+
     // Connect to the database
     connectDB();
 
+    // Swagger Documentation JSON
+    app.get('/api-docs.json', (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.send(swaggerSpec);
+    });
+
+    // Route pour la documentation Swagger personnalisée
+    app.get('/api-docs', (req, res) => {
+        res.sendFile(path.join(__dirname, '..', 'public', 'swagger.html'));
+    });
+
     // Routes
     app.get('/', (req, res) => {
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+        res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
     });
 
     app.use('/auth', authRoutes);
@@ -88,13 +103,13 @@ try {
     app.use('/programs', programRoutes);
     app.use('/tags', tagRoutes);
     app.use('/muscles', muscleRoutes);
-    app.use('/notifications', notificationRoutes);
     app.use('/api/weight', weightRoutes);
 
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
+        console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
     });
-} catch (error) {
+} catch (error: any) {
     console.error('Erreur critique lors du démarrage du serveur:', {
         error: error instanceof Error ? error.message : error,
         stack: error instanceof Error ? error.stack : undefined
