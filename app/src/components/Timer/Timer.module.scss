@@ -22,28 +22,6 @@
   width: 100%;
   align-items: center;
   padding: 0 1rem;
-  small {
-    display: flex;
-    gap: .25rem;
-    align-items: center;
-  }
-}
-
-.muteButton {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
-  color: var(--text-color);
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: var(--primary-color);
-  }
 }
 
 .buttonsContainer {
@@ -81,6 +59,7 @@
 
 .timeInputWrapper {
   position: relative;
+  margin-top: 1rem;
 }
 
 .timeDisplay {

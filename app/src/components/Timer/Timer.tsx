@@ -2,8 +2,6 @@ import { FC, useEffect, useState } from 'react';
 import styles from './Timer.module.scss';
 import { PiPauseBold, PiTriangleBold } from 'react-icons/pi';
 import { GrPowerReset } from 'react-icons/gr';
-import { IoWaterOutline } from 'react-icons/io5';
-import { IoVolumeMuteOutline, IoVolumeHighOutline } from 'react-icons/io5';
 
 type Props = {
   seconds: number;
@@ -15,29 +13,13 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
   const [isRunning, setIsRunning] = useState(true);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
-  const [timerKey, setTimerKey] = useState(Date.now()); // Clé pour forcer le re-rendu
-  const [isMuted, setIsMuted] = useState(false);
+  const [timerKey, setTimerKey] = useState(Date.now());
 
-  // Fonction pour jouer un son de notification
-  const playSound = (isLoud = false) => {
-    try {
-      console.log('Lecture du son de notification');
-      const audio = new Audio('/assets/Positive Notification Sound.mp3');
-      audio.volume = isLoud ? 1.0 : 0.7;
-      audio.play().catch(error => {
-        console.error('Erreur lors de la lecture du son:', error);
-      });
-    } catch (error) {
-      console.error('Erreur lors de la lecture du son:', error);
-    }
-  };
-
-  // Restaurer l'état du timer au chargement
   useEffect(() => {
     const savedTimer = localStorage.getItem('timer_state');
     if (savedTimer) {
       try {
-        const { endTime, wasRunning, muted } = JSON.parse(savedTimer);
+        const { endTime, wasRunning } = JSON.parse(savedTimer);
         if (endTime) {
           const now = new Date();
           const end = new Date(endTime);
@@ -47,7 +29,6 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
             setSeconds(remainingTime);
             setStartTime(new Date(end.getTime() - remainingTime * 1000));
             setIsRunning(wasRunning);
-            setIsMuted(muted || false);
           } else {
             localStorage.removeItem('timer_state');
           }
@@ -57,46 +38,28 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
         localStorage.removeItem('timer_state');
       }
     }
-
-    // Restaurer l'état du son
-    const mutedState = localStorage.getItem('timer_muted');
-    if (mutedState) {
-      setIsMuted(mutedState === 'true');
-    }
   }, [timerKey]);
 
-  // Sauvegarder l'état du timer
   useEffect(() => {
     if (isRunning && startTime) {
       localStorage.setItem(
         'timer_state',
         JSON.stringify({
           endTime: new Date(startTime.getTime() + seconds * 1000).toISOString(),
-          wasRunning: isRunning,
-          muted: isMuted
+          wasRunning: isRunning
         })
       );
     } else if (!isRunning) {
       localStorage.removeItem('timer_state');
     }
-  }, [isRunning, startTime, seconds, isMuted]);
+  }, [isRunning, startTime, seconds]);
 
-  // Sauvegarder l'état du son
-  useEffect(() => {
-    localStorage.setItem('timer_muted', isMuted.toString());
-  }, [isMuted]);
-
-  // Gérer les changements de visibilité
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        // L'application est mise en arrière-plan
         console.log('Timer: Application mise en arrière-plan');
-        // Pas besoin de faire quoi que ce soit, le timer continue grâce au localStorage
       } else if (document.visibilityState === 'visible') {
-        // L'application est remise au premier plan
         console.log('Timer: Application remise au premier plan');
-        // Forcer un re-rendu pour recalculer le temps restant
         setTimerKey(Date.now());
       }
     };
@@ -129,11 +92,6 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
           setIsRunning(false);
           setSeconds(0);
           localStorage.removeItem('timer_state');
-          
-          // Jouer un son lorsque le timer est terminé
-          if (!isMuted) {
-            playSound(true);
-          }
         } else {
           setSeconds(remainingTime);
         }
@@ -149,7 +107,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
         clearInterval(interval);
       }
     };
-  }, [isRunning, startTime, timerKey, isMuted]);
+  }, [isRunning, startTime, timerKey]);
 
   const handleStart = () => {
     if (!isRunning) {
@@ -172,10 +130,6 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
     localStorage.removeItem('timer_state');
   };
 
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-  };
-
   const convertSecondsToTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
       .toString()
@@ -193,25 +147,17 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
     }
   };
 
-  // Déterminer la couleur du timer en fonction du temps restant
   const getTimerColor = () => {
     if (seconds <= 15) {
-      return '#FF9800'; // Orange pour le temps faible
+      return '#FF9800';
     }
-    return '#000000'; // Noir par défaut
+    return '#000000';
   };
 
   return (
     <div>
       <div className={styles.timerContainer}>
         <div className={styles.timer}>
-          <div className={styles.timerHeader}>
-            <small>
-              <IoWaterOutline /> C'est le moment idéal pour boire une gorgée
-              d'eau.
-            </small>
-          </div>
-          <br />
           <div className={styles.timeInputWrapper}>
             <input
               type="text"
@@ -234,13 +180,6 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
             />
           </div>
           <div className={styles.buttonsContainer}>
-          <span 
-              onClick={toggleMute} 
-              className={styles.muteButton}
-              aria-label={isMuted ? "Activer le son" : "Couper le son"}
-            >
-              {isMuted ? <IoVolumeMuteOutline /> : <IoVolumeHighOutline />}
-            </span>
             {!isRunning ? (
               <span onClick={handleStart}>
                 <PiTriangleBold className={styles.playButton} />
@@ -250,12 +189,9 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
                 <PiPauseBold />
               </span>
             )}
-            
-            {defaultValue !== seconds && (
-              <span className={styles.reset} onClick={handleReset}>
-                <GrPowerReset className={styles.resetButton} />
-              </span>
-            )}
+            <span onClick={handleReset}>
+              <GrPowerReset />
+            </span>
           </div>
         </div>
       </div>

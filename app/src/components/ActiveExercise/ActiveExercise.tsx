@@ -303,13 +303,6 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
                 <button onClick={nextExercise}>Terminer l'exercice</button>
               )}
             </div>
-            <div className={styles.exerciseNavigation}>
-              {hasPrevious && (
-                <button onClick={previousExercise} className={styles.previousExerciseBtn}>
-                  Exercice précédent
-                </button>
-              )}
-            </div>
           </div>
         </>
       )}

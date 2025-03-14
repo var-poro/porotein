@@ -196,18 +196,11 @@ const ActiveSession = () => {
     <div className={styles.container}>
       <div className={styles.headerContainer}>
         <h5>{sessionData?.name}</h5>
-        <div className={styles.navigationInfo}>
-          {exerciseIndex > 0 && (
-            <small className={styles.previousExercise}>
-              Précédent : {sessionData.exercises[exerciseIndex - 1]?.name}
-            </small>
-          )}
           {sessionData.exercises[exerciseIndex + 1] && (
             <small className={styles.nextExercise}>
               À suivre : {sessionData.exercises[exerciseIndex + 1]?.name}
             </small>
           )}
-        </div>
         <h5>
           {exerciseIndex + 1} / {sessionData.exercises.length}
         </h5>
