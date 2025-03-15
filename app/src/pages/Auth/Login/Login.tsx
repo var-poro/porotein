@@ -38,7 +38,7 @@ const Login: React.FC = () => {
         exp: Math.floor(Date.now() / 1000) + 60 * 60,
       };
       login(user, navigate);
-      setLoginError(null); // Clear any previous errors on successful login
+      setLoginError(null);
     } catch (error: any) {
       if (error?.response && error?.response?.status === 401) {
         setLoginError(`L'identifiant ou le mot de passe est incorrect.`);
@@ -74,7 +74,25 @@ const Login: React.FC = () => {
         {errors.password && <span>Ce champ est obligatoire</span>}
       </div>
       {loginError && <div className={styles.error}>{loginError}</div>}
-      <button type="submit">Connexion</button>
+      <button type="submit" disabled={loginMutation.isLoading}>
+        {loginMutation.isLoading ? 'Connexion...' : 'Connexion'}
+      </button>
+      <div className={styles.links}>
+        <button
+          type="button"
+          onClick={() => navigate('/register')}
+          className={styles.linkButton}
+        >
+          Créer un compte
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/forgot-password')}
+          className={styles.linkButton}
+        >
+          Mot de passe oublié ?
+        </button>
+      </div>
     </form>
   );
 };

@@ -1,19 +1,26 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState, useRef } from 'react';
 import styles from './Timer.module.scss';
 import { PiPauseBold, PiTriangleBold } from 'react-icons/pi';
 import { GrPowerReset } from 'react-icons/gr';
+import { IoMdInfinite } from 'react-icons/io';
+
+const AUTO_MODE_KEY = 'timer_auto_mode';
 
 type Props = {
   seconds: number;
   setSeconds: (value: number) => void;
   defaultValue: number;
+  onComplete?: () => void;
 };
 
-const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
+const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => {
   const [isRunning, setIsRunning] = useState(true);
-  const [startTime, setStartTime] = useState<Date | null>(null);
-  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
-  const [timerKey, setTimerKey] = useState(Date.now());
+  const [isAutoMode, setIsAutoMode] = useState(() => {
+    const savedAutoMode = localStorage.getItem(AUTO_MODE_KEY);
+    return savedAutoMode ? JSON.parse(savedAutoMode) : false;
+  });
+  const endTimeRef = useRef<number | null>(null);
+  const frameRef = useRef<number | null>(null);
 
   useEffect(() => {
     const savedTimer = localStorage.getItem('timer_state');
@@ -21,14 +28,16 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
       try {
         const { endTime, wasRunning } = JSON.parse(savedTimer);
         if (endTime) {
-          const now = new Date();
-          const end = new Date(endTime);
-          const remainingTime = Math.ceil((end.getTime() - now.getTime()) / 1000);
+          const now = Date.now();
+          const remainingMs = Math.max(0, endTime - now);
+          const remainingSeconds = Math.ceil(remainingMs / 1000);
           
-          if (remainingTime > 0) {
-            setSeconds(remainingTime);
-            setStartTime(new Date(end.getTime() - remainingTime * 1000));
+          if (remainingSeconds > 0) {
+            setSeconds(remainingSeconds);
             setIsRunning(wasRunning);
+            if (wasRunning) {
+              endTimeRef.current = endTime;
+            }
           } else {
             localStorage.removeItem('timer_state');
           }
@@ -38,81 +47,72 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
         localStorage.removeItem('timer_state');
       }
     }
-  }, [timerKey]);
-
-  useEffect(() => {
-    if (isRunning && startTime) {
-      localStorage.setItem(
-        'timer_state',
-        JSON.stringify({
-          endTime: new Date(startTime.getTime() + seconds * 1000).toISOString(),
-          wasRunning: isRunning
-        })
-      );
-    } else if (!isRunning) {
-      localStorage.removeItem('timer_state');
-    }
-  }, [isRunning, startTime, seconds]);
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        console.log('Timer: Application mise en arrière-plan');
-      } else if (document.visibilityState === 'visible') {
-        console.log('Timer: Application remise au premier plan');
-        setTimerKey(Date.now());
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
   }, []);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    if (isRunning) {
+      localStorage.setItem(
+        'timer_state',
+        JSON.stringify({
+          endTime: endTimeRef.current,
+          wasRunning: isRunning
+        })
+      );
+    } else {
+      localStorage.removeItem('timer_state');
+    }
+  }, [isRunning, seconds]);
+
+  useEffect(() => {
+    const updateTimer = () => {
+      if (isRunning && endTimeRef.current) {
+        const now = Date.now();
+        const remaining = Math.max(0, endTimeRef.current - now);
+        const newSeconds = Math.ceil(remaining / 1000);
+
+        if (newSeconds !== seconds) {
+          setSeconds(newSeconds);
+        }
+
+        if (newSeconds <= 0) {
+          setIsRunning(false);
+          endTimeRef.current = null;
+          localStorage.removeItem('timer_state');
+          if (isAutoMode && onComplete) {
+            onComplete();
+          }
+        } else {
+          frameRef.current = requestAnimationFrame(updateTimer);
+        }
+      }
+    };
 
     if (isRunning) {
-      const endTime = startTime ? 
-        new Date(startTime.getTime() + seconds * 1000) : 
-        new Date(Date.now() + seconds * 1000);
-
-      if (!startTime) {
-        setStartTime(new Date());
+      if (!endTimeRef.current) {
+        endTimeRef.current = Date.now() + seconds * 1000;
       }
-
-      interval = setInterval(() => {
-        const now = new Date();
-        const remainingTime = Math.max(0, Math.ceil((endTime.getTime() - now.getTime()) / 1000));
-
-        if (remainingTime <= 0) {
-          clearInterval(interval);
-          setIsRunning(false);
-          setSeconds(0);
-          localStorage.removeItem('timer_state');
-        } else {
-          setSeconds(remainingTime);
-        }
-      }, 100); // Intervalle plus court pour une mise à jour plus fluide
-
-      setIntervalId(interval);
-    } else if (intervalId) {
-      clearInterval(intervalId);
+      frameRef.current = requestAnimationFrame(updateTimer);
+    } else {
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
+      }
+      endTimeRef.current = null;
+      localStorage.removeItem('timer_state');
     }
 
     return () => {
-      if (interval) {
-        clearInterval(interval);
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
       }
     };
-  }, [isRunning, startTime, timerKey]);
+  }, [isRunning, isAutoMode, onComplete, seconds]);
 
   const handleStart = () => {
     if (!isRunning) {
       setIsRunning(true);
-      setStartTime(new Date());
+      endTimeRef.current = Date.now() + seconds * 1000;
     }
   };
 
@@ -126,8 +126,18 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
   const handleReset = () => {
     setIsRunning(false);
     setSeconds(defaultValue);
-    setStartTime(null);
+    endTimeRef.current = null;
+    if (frameRef.current) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+    }
     localStorage.removeItem('timer_state');
+  };
+
+  const toggleAutoMode = () => {
+    const newAutoMode = !isAutoMode;
+    setIsAutoMode(newAutoMode);
+    localStorage.setItem(AUTO_MODE_KEY, JSON.stringify(newAutoMode));
   };
 
   const convertSecondsToTime = (seconds: number) => {
@@ -143,7 +153,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
     const totalSeconds = minutes * 60 + (seconds || 0);
     setSeconds(totalSeconds);
     if (isRunning) {
-      setStartTime(new Date());
+      endTimeRef.current = Date.now() + totalSeconds * 1000;
     }
   };
 
@@ -167,6 +177,8 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
                 color: getTimerColor(),
               }}
               className={styles.timeDisplay}
+              aria-label="Temps restant"
+              title="Temps restant"
             />
             <input
               type="time"
@@ -177,21 +189,43 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue }) => {
               max={'59:59'}
               pattern="[0-9]{2}:[0-9]{2}"
               step={1}
+              aria-label="Définir le temps"
+              title="Définir le temps"
             />
           </div>
           <div className={styles.buttonsContainer}>
             {!isRunning ? (
-              <span onClick={handleStart}>
+              <div 
+                onClick={handleStart}
+                aria-label="Démarrer le timer"
+                className={styles.iconButton}
+              >
                 <PiTriangleBold className={styles.playButton} />
-              </span>
+              </div>
             ) : (
-              <span onClick={handlePause}>
+              <div 
+                onClick={handlePause}
+                aria-label="Mettre en pause"
+                className={styles.iconButton}
+              >
                 <PiPauseBold />
-              </span>
+              </div>
             )}
-            <span onClick={handleReset}>
+            <div 
+              onClick={handleReset}
+              aria-label="Réinitialiser le timer"
+              className={styles.iconButton}
+            >
               <GrPowerReset />
-            </span>
+            </div>
+            <div
+              onClick={toggleAutoMode}
+              aria-label="Mode automatique"
+              className={`${styles.iconButton} ${isAutoMode ? styles.autoModeActive : ''}`}
+              title={isAutoMode ? "Désactiver le mode automatique" : "Activer le mode automatique"}
+            >
+              <IoMdInfinite />
+            </div>
           </div>
         </div>
       </div>

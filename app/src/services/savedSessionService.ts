@@ -20,6 +20,11 @@ export const getSavedSessionById = async (id: string) => {
   return data;
 };
 
+export const deleteSavedSession = async (id: string) => {
+  const { data } = await apiClient.delete(`/saved-sessions/${id}`);
+  return data;
+};
+
 export const createSavedExercise = async (sessionId: string, exercise: Exercise) => {
   const { data } = await apiClient.post(
     `/saved-sessions/${sessionId}/exercises`,

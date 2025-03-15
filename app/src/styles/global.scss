@@ -37,12 +37,12 @@ a {
 }
 
 button {
-  //font-size: 1rem;
+  font-size: 1rem;
   margin: 0 auto;
   background-color: var(--primary-color);
   border: none;
   border-radius: var(--border-radius);
-  padding: calc(var(--spacing) / 2) var(--spacing);
+  padding: calc(var(--spacing)) var(--spacing);
   color: #fff;
   cursor: pointer;
 }

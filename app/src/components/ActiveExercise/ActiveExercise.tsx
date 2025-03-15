@@ -288,6 +288,13 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
                     saveExerciseToLocal();
                   }}
                   defaultValue={exercise.repSets?.[currentSeriesIndex].restTime}
+                  onComplete={() => {
+                    if (currentSeriesIndex + 1 === exercise.repSets.length) {
+                      nextExercise();
+                    } else {
+                      handleNextRepSet();
+                    }
+                  }}
                 />
               )}
             </>

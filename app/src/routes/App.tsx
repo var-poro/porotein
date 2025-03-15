@@ -3,6 +3,8 @@ import { AuthProvider } from '@/context/AuthContext';
 import '@/styles/global.scss';
 import Login from '@/pages/Auth/Login/Login.tsx';
 import Register from '@/pages/Auth/Register/Register.tsx';
+import ForgotPassword from '@/pages/Auth/ForgotPassword/ForgotPassword.tsx';
+import ResetPassword from '@/pages/Auth/ResetPassword/ResetPassword.tsx';
 import PrivateRoute from '@/routes/PrivateRoute.tsx';
 import Home from '@/pages/Home/Home.tsx';
 import ProgramForm from '@/pages/Program/ProgramForm/ProgramForm.tsx';
@@ -28,6 +30,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Home />} />
             {/* Programs */}

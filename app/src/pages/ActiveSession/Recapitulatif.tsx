@@ -1,25 +1,31 @@
-import { useParams, useLocation } from 'react-router-dom';
-import { useQuery } from 'react-query';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { Loading } from '@/components';
-import { getSavedSessionById, getSavedSessionsBySessionId } from '@/services/savedSessionService.ts';
+import { getSavedSessionById, getSavedSessionsBySessionId, deleteSavedSession } from '@/services/savedSessionService.ts';
 import { useGetCurrentUser } from '@/utils/useGetCurrentUser.ts';
 import { formatDuration } from '@/utils/formatDuration.ts';
 import styles from './Recapitulatif.module.scss';
 import { Tile, TileContainer } from '@/components/Tile';
 import { ExerciseChart } from '@/components/ExerciseChart/ExerciseChart';
-import { BiLineChart, BiUpArrowAlt, BiDownArrowAlt, BiMinus } from 'react-icons/bi';
+import { BiLineChart, BiUpArrowAlt, BiDownArrowAlt, BiMinus, BiTrash } from 'react-icons/bi';
 import { SavedExercise, SavedSession } from '@/types/SavedSession';
+import toast from 'react-hot-toast';
 
 const Recapitulatif = () => {
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const isJustFinished = location.state?.justFinished;
   const { data: user } = useGetCurrentUser();
 
-  const { data: savedSessionData, isLoading: sessionLoading } = useQuery(
+  const { data: savedSessionData, isLoading: sessionLoading, isError: sessionError } = useQuery(
     ['savedSession', id],
     () => getSavedSessionById(id || ''),
-    { enabled: !!id }
+    { 
+      enabled: !!id,
+      retry: false // Ne pas réessayer si la requête échoue
+    }
   );
 
   const { data: historicalSessions, isLoading: historyLoading } = useQuery(
@@ -28,9 +34,41 @@ const Recapitulatif = () => {
     { enabled: !!savedSessionData?.sessionId?._id }
   );
 
+  const deleteMutation = useMutation(deleteSavedSession, {
+    onSuccess: () => {
+      toast.success('Séance supprimée avec succès');
+      queryClient.invalidateQueries('savedSessions');
+      navigate('/history');
+    },
+    onError: () => {
+      toast.error('Erreur lors de la suppression de la séance');
+    }
+  });
+
+  const handleDelete = () => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette séance ?')) {
+      deleteMutation.mutate(id || '');
+    }
+  };
+
   const sessionData = savedSessionData?.sessionId;
 
   if (sessionLoading || historyLoading) return <Loading />;
+
+  if (sessionError || !savedSessionData) {
+    return (
+      <div className={styles.errorContainer}>
+        <h1>Session introuvable</h1>
+        <p>Désolé, la session que vous recherchez n'existe pas ou a été supprimée.</p>
+        <button 
+          onClick={() => navigate('/history')}
+          className={styles.returnButton}
+        >
+          Retourner à l'historique
+        </button>
+      </div>
+    );
+  }
 
   const prepareExerciseHistory = (exerciseId: string) => {
     console.log('Historical Sessions:', historicalSessions);
@@ -103,18 +141,27 @@ const Recapitulatif = () => {
   return (
     <div className={styles.recapContainer}>
       <div className={styles.header}>
-        {isJustFinished ? (
-          <>
-            <h1>🎉 Félicitations, {user?.username} !</h1>
-            <p className={styles.subtitle}>Vous venez de terminer votre séance</p>
-          </>
-        ) : (
-          <>
-            <h1>Récapitulatif de séance</h1>
-            <p className={styles.subtitle}>Session du {new Date(savedSessionData?.performedAt).toLocaleDateString()}</p>
-          </>
-        )}
-        <h3>{sessionData?.name}</h3>
+        <div className={styles.headerContent}>
+          {isJustFinished ? (
+            <>
+              <h1>🎉 Félicitations, {user?.username} !</h1>
+              <p className={styles.subtitle}>Vous venez de terminer votre séance</p>
+            </>
+          ) : (
+            <>
+              <h1>Récapitulatif de séance</h1>
+              <p className={styles.subtitle}>Session du {new Date(savedSessionData?.performedAt).toLocaleDateString()}</p>
+            </>
+          )}
+          <h3>{sessionData?.name}</h3>
+        </div>
+        <div 
+          className={styles.deleteButton}
+          onClick={handleDelete}
+          title="Supprimer la séance"
+        >
+          <BiTrash />
+        </div>
       </div>
 
       <TileContainer>
