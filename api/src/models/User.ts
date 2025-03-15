@@ -8,6 +8,7 @@ interface IWeightDetail {
 }
 
 interface IMeasurementDetail {
+  _id?: Schema.Types.ObjectId;
   measurementType: string;
   value: number;
   date: Date;
@@ -22,6 +23,8 @@ interface IUser extends Document {
   weightHistory: IWeightDetail[];
   measurementsHistory: IMeasurementDetail[];
   activeProgram: Schema.Types.ObjectId | typeof Program;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
 }
 
 const weightDetailSchema = new Schema<IWeightDetail>({
@@ -43,6 +46,8 @@ const userSchema = new Schema<IUser>({
   weightHistory: [weightDetailSchema],
   measurementsHistory: [measurementDetailSchema],
   activeProgram: { type: Schema.Types.ObjectId, ref: 'Program' },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date }
 });
 
 const User = model<IUser>('User', userSchema);

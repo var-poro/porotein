@@ -75,3 +75,9 @@
   width: 100px;
   height: 100%;
 }
+
+.iconButton {
+  &.autoModeActive {
+    color: var(--primary-color);
+  }
+}

@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import { Schema } from 'mongoose';
+import crypto from 'crypto';
+import { transporter, getPasswordResetEmailTemplate } from '../config/email';
 
 const generateAccessToken = (userId: Schema.Types.ObjectId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET as string, { expiresIn: '24h' });
@@ -94,5 +96,74 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
     res.send({ accessToken });
   } catch (error) {
     res.status(403).send({ error: 'Invalid refresh token' });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Aucun compte associé à cette adresse email.' });
+    }
+
+    // Générer un token unique
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = await bcrypt.hash(resetToken, 8);
+
+    // Sauvegarder le token et sa date d'expiration
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); // Expire dans 1 heure
+    await user.save();
+
+    // Construire l'URL de réinitialisation
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password`;
+
+    // Envoyer l'email
+    const emailTemplate = getPasswordResetEmailTemplate(user.username, resetToken, resetUrl);
+    await transporter.sendMail({
+      to: user.email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+    });
+
+    res.json({ message: 'Un email de réinitialisation a été envoyé.' });
+  } catch (error) {
+    console.error('Erreur lors de la réinitialisation du mot de passe:', error);
+    res.status(500).json({ error: 'Erreur lors de l\'envoi de l\'email de réinitialisation.' });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { token, password } = req.body;
+    
+    // Trouver l'utilisateur avec un token valide
+    const user = await User.findOne({
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Le token de réinitialisation est invalide ou a expiré.' });
+    }
+
+    // Vérifier le token
+    const isValidToken = await bcrypt.compare(token, user.resetPasswordToken || '');
+    if (!isValidToken) {
+      return res.status(400).json({ error: 'Token invalide.' });
+    }
+
+    // Mettre à jour le mot de passe
+    const hashedPassword = await bcrypt.hash(password, 8);
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json({ message: 'Mot de passe réinitialisé avec succès.' });
+  } catch (error) {
+    console.error('Erreur lors de la réinitialisation du mot de passe:', error);
+    res.status(500).json({ error: 'Erreur lors de la réinitialisation du mot de passe.' });
   }
 };

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { loginUser, registerUser, refreshAccessToken } from '../controllers/authController';
+import { loginUser, registerUser, refreshAccessToken, forgotPassword, resetPassword } from '../controllers/authController';
 
 const router = Router();
 
@@ -135,5 +135,67 @@ router.post('/login', loginUser);
  *         description: Token invalide ou expiré
  */
 router.post('/refresh-token', refreshAccessToken);
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Demande de réinitialisation de mot de passe
+ *     tags: [Authentification]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email de l'utilisateur
+ *     responses:
+ *       200:
+ *         description: Email de réinitialisation envoyé
+ *       404:
+ *         description: Utilisateur non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+router.post('/forgot-password', forgotPassword);
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Réinitialisation du mot de passe
+ *     tags: [Authentification]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - password
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Token de réinitialisation
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: Nouveau mot de passe
+ *     responses:
+ *       200:
+ *         description: Mot de passe réinitialisé avec succès
+ *       400:
+ *         description: Token invalide ou expiré
+ *       500:
+ *         description: Erreur serveur
+ */
+router.post('/reset-password', resetPassword);
 
 export default router;
