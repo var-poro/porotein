@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { loginUser, registerUser, refreshAccessToken, forgotPassword, resetPassword } from '../controllers/authController';
+import { loginUser, registerUser, refreshAccessToken, forgotPassword, resetPassword, verifyEmail, sendMagicLink, verifyMagicLink } from '../controllers/authController';
 
 const router = Router();
 
@@ -197,5 +197,36 @@ router.post('/forgot-password', forgotPassword);
  *         description: Erreur serveur
  */
 router.post('/reset-password', resetPassword);
+
+/**
+ * @swagger
+ * /auth/verify-email:
+ *   post:
+ *     summary: Vérification de l'adresse email
+ *     tags: [Authentification]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Token de vérification d'email
+ *     responses:
+ *       200:
+ *         description: Email vérifié avec succès
+ *       400:
+ *         description: Token invalide
+ *       500:
+ *         description: Erreur serveur
+ */
+router.post('/verify-email', verifyEmail);
+
+router.post('/magic-link', sendMagicLink);
+router.post('/verify-magic-link', verifyMagicLink);
 
 export default router;

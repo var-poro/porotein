@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
+import { Toaster } from 'react-hot-toast';
 import '@/styles/global.scss';
 import Login from '@/pages/Auth/Login/Login.tsx';
 import Register from '@/pages/Auth/Register/Register.tsx';
@@ -20,6 +21,8 @@ import TagManager from '@/pages/Tag/TagManager.tsx';
 import ActiveSession from '@/pages/ActiveSession/ActiveSession.tsx';
 import Recapitulatif from '@/pages/ActiveSession/Recapitulatif.tsx';
 import AppStateHandler from '@/components/AppStateHandler/AppStateHandler.tsx';
+import VerifyEmail from '@/pages/Auth/VerifyEmail/VerifyEmail';
+import VerifyMagicLink from '@/pages/Auth/VerifyMagicLink/VerifyMagicLink';
 
 function App() {
   return (
@@ -27,11 +30,28 @@ function App() {
       <Router>
         <ScrollToTop />
         <AppStateHandler />
+        <Toaster
+          position="top-center"
+          containerStyle={{
+            margin: 'auto',
+          }}
+          toastOptions={{
+            duration: 5000,
+            style: {
+              fontSize: '.9rem',
+              background: 'var(--background-color)',
+              color: 'var(--text-color)',
+              fontFamily: 'var(--font-family), sans-serif',
+            },
+          }}
+        />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/verify-magic-link" element={<VerifyMagicLink />} />
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Home />} />
             {/* Programs */}

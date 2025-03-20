@@ -29,10 +29,6 @@
 
   &.expanded {
     &[data-view="chart"] {
-      grid-column: 1 / -1;
-      width: calc(100vw - 5rem);
-      margin-left: calc(-50vw + 50%);
-      margin-right: calc(-50vw + 50%);
       border-radius: 0;
       
       @media (min-width: 1400px) {
@@ -215,10 +211,6 @@
 
   &.expanded {
     &[data-view="chart"] {
-      grid-column: 1 / -1;
-      width: 100vw;
-      margin-left: calc(-50vw + 50%);
-      margin-right: calc(-50vw + 50%);
       border-radius: 0;
       
       @media (min-width: 1400px) {
