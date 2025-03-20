@@ -15,6 +15,7 @@ export default defineConfig({
       // Utilisation du mode generateSW pour générer un service worker
       strategies: 'generateSW',
       registerType: 'autoUpdate',
+      includeAssets: ['**/*'],
       // Définition du manifest pour l'installation sur l'écran d'accueil
       manifest: {
         name: 'Porotein',
@@ -73,4 +74,5 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  publicDir: 'public',
 });

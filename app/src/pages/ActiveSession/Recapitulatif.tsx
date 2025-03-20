@@ -83,8 +83,8 @@ const Recapitulatif = () => {
     
     const history = historicalSessions?.map((savedSession: SavedSession) => {
       console.log('Processing session:', savedSession);
-      const exercise = savedSession.savedExercises.find(savedExercise => {
-        const exId = savedExercise.exerciseId;
+      const exercise = savedSession.exercises?.find(savedExercise => {
+        const exId = savedExercise._id;
         console.log('Comparing IDs:', exId, exerciseId);
         return exId?.toString() === exerciseId?.toString();
       });
@@ -95,8 +95,8 @@ const Recapitulatif = () => {
       }
       
       console.log('Found exercise:', exercise);
-      const avgReps = exercise.repSets.reduce((sum, set) => sum + set.repetitions, 0) / exercise.repSets?.length;
-      const avgWeight = exercise.repSets.reduce((sum, set) => sum + set.weight, 0) / exercise.repSets?.length;
+      const avgReps = exercise.repSets?.reduce((sum, set) => sum + set.repetitions, 0) / exercise.repSets?.length;
+      const avgWeight = exercise.repSets?.reduce((sum, set) => sum + set.weight, 0) / exercise.repSets?.length;
       
       const result = {
         date: new Date(savedSession.performedAt).toLocaleDateString(),
@@ -128,8 +128,8 @@ const Recapitulatif = () => {
     const currentSession = savedSessionData;
   
     const totalVolume = (session: Session) => 
-      session.savedExercises.reduce((acc, ex) => 
-        acc + ex.savedRepSets.reduce((setAcc: number, set: { weight: number; repetitions: number }) => 
+      session.savedExercises?.reduce((acc, ex) => 
+        acc + ex.savedRepSets?.reduce((setAcc: number, set: { weight: number; repetitions: number }) => 
           setAcc + (set.weight * set.repetitions), 0), 0);
   
     const currentVolume = totalVolume(currentSession);

@@ -145,7 +145,7 @@ export const getSavedSessionsBySessionId = async (req: AuthRequest, res: Respons
     })
     .sort({ performedAt: -1 })
     .populate('session')
-    .populate('savedExercises.exercise');
+    .populate('savedExercises.exerciseId');
 
     console.log('Found sessions:', savedSessions.length);
     res.json(savedSessions);

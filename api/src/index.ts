@@ -16,7 +16,6 @@ import dotenv from 'dotenv';
 import path from "node:path";
 import weightRoutes from './routes/weightRoutes';
 import swaggerSpec from './config/swagger';
-import fs from 'fs';
 
 try {
     // Résolution du chemin du fichier .env

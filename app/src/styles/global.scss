@@ -19,8 +19,10 @@ body {
   padding-bottom: 8rem;
   background-color: #ffffff;
   min-height: calc(100svh - 8rem);
+  height: 100svh;
 
   #root {
+    min-height: 100%;
     height: calc(100% - 5rem);
     width: 100%;
   }

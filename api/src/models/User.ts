@@ -25,6 +25,10 @@ interface IUser extends Document {
   activeProgram: Schema.Types.ObjectId | typeof Program;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
+  emailVerificationToken?: string;
+  emailVerified: boolean;
+  magicLinkToken?: string;
+  magicLinkExpires?: Date;
 }
 
 const weightDetailSchema = new Schema<IWeightDetail>({
@@ -47,7 +51,17 @@ const userSchema = new Schema<IUser>({
   measurementsHistory: [measurementDetailSchema],
   activeProgram: { type: Schema.Types.ObjectId, ref: 'Program' },
   resetPasswordToken: { type: String },
-  resetPasswordExpires: { type: Date }
+  resetPasswordExpires: { type: Date },
+  emailVerificationToken: { type: String },
+  emailVerified: { type: Boolean, default: false },
+  magicLinkToken: {
+    type: String,
+    required: false
+  },
+  magicLinkExpires: {
+    type: Date,
+    required: false
+  }
 });
 
 const User = model<IUser>('User', userSchema);

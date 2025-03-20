@@ -22,16 +22,26 @@ const ForgotPassword: React.FC = () => {
 
   const forgotPasswordMutation = useMutation(forgotPassword, {
     onSuccess: () => {
-      toast.success('Un email de réinitialisation a été envoyé à votre adresse email.');
-      navigate('/login');
+      toast.success('Un email de réinitialisation a été envoyé à votre adresse email. Veuillez vérifier votre boîte de réception.');
+      
+      setTimeout(() => {
+        navigate('/login');
+      }, 6000);
     },
     onError: (error: ApiError) => {
-      toast.error(error.response?.data?.error || 'Une erreur est survenue.');
+      const errorMessage = error.response?.data?.message || 'Une erreur est survenue lors de l\'envoi de l\'email.';
+      toast.error(errorMessage);
     },
   });
 
   const onSubmit: SubmitHandler<ForgotPasswordFormInputs> = (data) => {
-    forgotPasswordMutation.mutate(data);
+    const loadingToast = toast.loading('Envoi de l\'email en cours...');
+    
+    forgotPasswordMutation.mutate(data, {
+      onSettled: () => {
+        toast.dismiss(loadingToast);
+      },
+    });
   };
 
   return (
@@ -56,23 +66,22 @@ const ForgotPassword: React.FC = () => {
           <span className={styles.error}>{errors.email.message}</span>
         )}
       </div>
-
+      <div className={styles.buttons}>
+      <button
+          type="button"
+          className={styles.ghostButton}
+          onClick={() => navigate('/login')}
+        >
+          Retour à la connexion
+        </button>
       <button
         type="submit"
         disabled={forgotPasswordMutation.isLoading}
       >
         {forgotPasswordMutation.isLoading ? 'Envoi en cours...' : 'Envoyer'}
       </button>
-
-      <div className={styles.links}>
-        <button
-          type="button"
-          onClick={() => navigate('/login')}
-          className={styles.linkButton}
-        >
-          Retour à la connexion
-        </button>
       </div>
+      
     </form>
   );
 };

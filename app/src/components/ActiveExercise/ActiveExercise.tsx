@@ -26,6 +26,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
   const [repSets, setRepSets] = useLocalStorage(`repSets_${exercise._id}`, exercise.repSets);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const exerciseRef = useRef<HTMLDivElement>(null);
 
   const { data: muscles, isLoading: isMusclesLoading } = useQuery(
@@ -184,6 +185,13 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
     setVideoLoaded(true);
   };
 
+  const handleNextExercise = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      nextExercise();
+    }, 3000);
+  };
+
   if (isMusclesLoading || isTagsLoading) return <Loading />;
 
   return (
@@ -250,9 +258,17 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
       {exerciseStarted && (
         <>
           <div className={styles.header}>
-            <h4>Série {currentSeriesIndex + 1} </h4>
+            <h4>Série {repSetIsDone && currentSeriesIndex + 1 < exercise.repSets.length ? currentSeriesIndex + 2 : currentSeriesIndex + 1} </h4>
             <small>/ {exercise.repSets.length}</small>
           </div>
+          {repSetIsDone && 
+           currentSeriesIndex + 1 < exercise.repSets.length && 
+           repSets[currentSeriesIndex]?.weight !== repSets[currentSeriesIndex + 1]?.weight && 
+           repSets[currentSeriesIndex + 1]?.weight !== undefined && (
+            <div className={styles.weightChange}>
+              <span>Poids : {repSets[currentSeriesIndex]?.weight || 0}kg → {repSets[currentSeriesIndex + 1]?.weight || 0}kg</span>
+            </div>
+          )}
           {exercise.repSets?.[currentSeriesIndex] && (
             <>
               {!repSetIsDone ? (
@@ -290,7 +306,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
                   defaultValue={exercise.repSets?.[currentSeriesIndex].restTime}
                   onComplete={() => {
                     if (currentSeriesIndex + 1 === exercise.repSets.length) {
-                      nextExercise();
+                      handleNextExercise();
                     } else {
                       handleNextRepSet();
                     }
@@ -307,7 +323,9 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
               {currentSeriesIndex + 1 !== exercise.repSets.length || !repSetIsDone ? (
                 <button onClick={handleNextRepSet}>Suivant</button>
               ) : (
-                <button onClick={nextExercise}>Terminer l'exercice</button>
+                <button onClick={handleNextExercise}>
+                  {isTransitioning ? 'Préparation...' : 'Terminer l\'exercice'}
+                </button>
               )}
             </div>
           </div>

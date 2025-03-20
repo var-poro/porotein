@@ -1,39 +1,138 @@
-.loginContainer {
+.container {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  text-align: left;
   margin: auto;
-  gap: var(--spacing);
-  height: 100svh;
+  gap: calc(var(--spacing) * 2);
+  min-height: 100%;
+  position: relative;
+  padding: var(--spacing);
+
+  h1 {
+    font-size: 2rem;
+  }
 
   .inputContainer {
     gap: calc(var(--spacing) / 2);
     display: flex;
     flex-direction: column;
-  }
-}
+    margin-bottom: var(--spacing);
 
-.error {
-  color: var(--error-color);
-  text-align: center;
+    label {
+      font-size: 0.9rem;
+      color: var(--text-color);
+    }
+
+    input {
+      padding: calc(var(--spacing) * 0.75);
+      border: 1px solid var(--border-color);
+      background-color: var(--background-color);
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+
+      &::placeholder {
+        color: var(--text-color-light);
+        opacity: 0.5;
+      }
+
+      &.error {
+        border-color: var(--error-color);
+      }
+    }
+  }
+
+  p {
+    color: var(--text-color-light);
+    font-size: 0.9rem;
+  }
+  .buttonContainer {
+    display: flex;
+    gap: calc(var(--spacing) * 0.5);
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      padding: calc(var(--spacing) * 0.75);
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 500;
+      margin: calc(var(--spacing) * 0.5) 0;
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+  }
 }
 
 .links {
   display: flex;
-  justify-content: space-between;
-  gap: var(--spacing);
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--spacing) * 0.75);
 }
 
-.linkButton {
+.linkButton, .magicLinkButton {
   background: none;
   border: none;
   color: var(--primary-color);
   text-decoration: underline;
   cursor: pointer;
-  padding: 0;
-  font-size: 0.9em;
+  padding: calc(var(--spacing) / 2);
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
 
-  &:hover {
-    color: var(--primary-color-dark);
+.registerLink {
+  position: absolute;
+  bottom: -3rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  span, button {
+    font-size: 0.9rem;
+    margin: 0;
   }
+}
+
+.registerButton {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: calc(var(--spacing) / 2);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.authMethodToggle {
+  display: flex;
+  gap: var(--spacing);
+  margin-bottom: var(--spacing);
+
+  .toggleButton {
+    background: none;
+    border: none;
+    color: var(--text-color-light);
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 4px;
+
+    &.active {
+      color: var(--primary-color);
+      background-color: var(--background-color-light);
+    }
+  }
+}
+
+.countdown {
+  color: var(--text-color-light);
+  font-size: 0.9rem;
+  margin: var(--spacing) 0;
 }
