@@ -28,11 +28,18 @@ const Recapitulatif = () => {
     }
   );
 
+  console.log('savedSessionData:', savedSessionData);
+
   const { data: historicalSessions, isLoading: historyLoading } = useQuery(
-    ['sessionHistory', savedSessionData?.sessionId?._id],
-    () => getSavedSessionsBySessionId(savedSessionData?.sessionId?._id || ''),
-    { enabled: !!savedSessionData?.sessionId?._id }
+    ['sessionHistory', savedSessionData?.session?._id],
+    () => {
+      console.log('Fetching history for sessionId:', savedSessionData?.session?._id);
+      return getSavedSessionsBySessionId(savedSessionData?.session?._id || '');
+    },
+    { enabled: !!savedSessionData?.session?._id }
   );
+
+  console.log('historicalSessions:', historicalSessions);
 
   const deleteMutation = useMutation(deleteSavedSession, {
     onSuccess: () => {
@@ -51,7 +58,7 @@ const Recapitulatif = () => {
     }
   };
 
-  const sessionData = savedSessionData?.sessionId;
+  const sessionData = savedSessionData?.session;
 
   if (sessionLoading || historyLoading) return <Loading />;
 
@@ -88,8 +95,8 @@ const Recapitulatif = () => {
       }
       
       console.log('Found exercise:', exercise);
-      const avgReps = exercise.savedRepSets.reduce((sum, set) => sum + set.repetitions, 0) / exercise.savedRepSets?.length;
-      const avgWeight = exercise.savedRepSets.reduce((sum, set) => sum + set.weight, 0) / exercise.savedRepSets?.length;
+      const avgReps = exercise.repSets.reduce((sum, set) => sum + set.repetitions, 0) / exercise.repSets?.length;
+      const avgWeight = exercise.repSets.reduce((sum, set) => sum + set.weight, 0) / exercise.repSets?.length;
       
       const result = {
         date: new Date(savedSession.performedAt).toLocaleDateString(),
