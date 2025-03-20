@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import apiClient from '@/services/apiService';
-import { ApiError } from '@/types/api';
 import { DecodedToken } from '@/utils/tokenUtils';
 import styles from './VerifyMagicLink.module.scss';
 
