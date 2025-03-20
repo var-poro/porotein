@@ -137,18 +137,24 @@ export const getSavedSessionsBySessionId = async (req: AuthRequest, res: Respons
     const { sessionId } = req.params;
     const userId = req.userId;
 
+    console.log('Fetching sessions for:', { sessionId, userId });
+
     const savedSessions = await SavedSession.find({ 
-      userId: new Types.ObjectId(userId), 
-      sessionId: new Types.ObjectId(sessionId) 
+      userId: userId, 
+      sessionId: sessionId 
     })
     .sort({ performedAt: -1 })
     .populate('session')
     .populate('savedExercises.exercise');
 
+    console.log('Found sessions:', savedSessions.length);
     res.json(savedSessions);
   } catch (error) {
     console.error('Error fetching saved sessions by session ID:', error);
-    res.status(500).json({ message: 'Error fetching saved sessions' });
+    res.status(500).json({ 
+      message: 'Error fetching saved sessions',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 };
 
