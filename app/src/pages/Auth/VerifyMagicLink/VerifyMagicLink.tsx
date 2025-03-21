@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import apiClient from '@/services/apiService';
 import { DecodedToken } from '@/utils/tokenUtils';
-import styles from './VerifyMagicLink.module.scss';
+import { Container, Paper, Title, Text, Button, Stack, Loader } from '@mantine/core';
 
 const VerifyMagicLink: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -60,29 +60,42 @@ const VerifyMagicLink: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className={styles.container}>
-        <h2>Vérification de votre connexion...</h2>
-      </div>
+      <Container size="xs" h="100vh" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <Paper radius="md" p="xl" withBorder w="100%">
+          <Stack align="center">
+            <Loader size="xl" />
+            <Title order={2}>Vérification de votre connexion...</Title>
+          </Stack>
+        </Paper>
+      </Container>
     );
   }
 
   if (isSuccess) {
     return (
-      <div className={styles.container}>
-        <h2>Connexion réussie !</h2>
-        <p>Vous allez être redirigé vers la page d'accueil...</p>
-      </div>
+      <Container size="xs" h="100vh" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <Paper radius="md" p="xl" withBorder w="100%">
+          <Stack align="center">
+            <Title order={2}>Connexion réussie !</Title>
+            <Text>Vous allez être redirigé vers la page d'accueil...</Text>
+          </Stack>
+        </Paper>
+      </Container>
     );
   }
 
   return (
-    <div className={styles.container}>
-      <h2>Erreur de connexion</h2>
-      {error && <p className={styles.error}>{error}</p>}
-      <button onClick={() => navigate('/login')} className={styles.button}>
-        Retour à la connexion
-      </button>
-    </div>
+    <Container size="xs" h="100vh" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+      <Paper radius="md" p="xl" withBorder w="100%">
+        <Stack align="center">
+          <Title order={2}>Erreur de connexion</Title>
+          {error && <Text c="red">{error}</Text>}
+          <Button onClick={() => navigate('/login')} fullWidth>
+            Retour à la connexion
+          </Button>
+        </Stack>
+      </Paper>
+    </Container>
   );
 };
 

@@ -9,6 +9,12 @@
     "dev": "concurrently \"pnpm run dev:api\" \"pnpm run dev:app\""
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@mantine/core": "^7.17.2",
+    "@mantine/form": "^7.17.2",
+    "@mantine/hooks": "^7.17.2",
+    "@mantine/notifications": "^7.17.2",
+    "@tabler/icons-react": "^3.31.0",
     "web-push": "^3.6.7"
   }
 }

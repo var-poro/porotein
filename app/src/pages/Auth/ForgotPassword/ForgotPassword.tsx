@@ -3,7 +3,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import styles from './ForgotPassword.module.scss';
+import { TextInput, Button, Stack, Text, Container, Paper, Title } from '@mantine/core';
 import apiClient from '@/services/apiService';
 import { ApiError, ApiResponse } from '@/types/api';
 
@@ -45,44 +45,39 @@ const ForgotPassword: React.FC = () => {
   };
 
   return (
-    <form className={styles.container} onSubmit={handleSubmit(onSubmit)}>
-      <h1>Mot de passe oublié</h1>
-      <p>Entrez votre adresse email pour recevoir un lien de réinitialisation.</p>
-      
-      <div className={styles.inputContainer}>
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          {...register('email', {
-            required: 'L\'email est requis',
-            pattern: {
-              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: 'Adresse email invalide',
-            },
-          })}
-        />
-        {errors.email && (
-          <span className={styles.error}>{errors.email.message}</span>
-        )}
-      </div>
-      <div className={styles.buttons}>
-      <button
-          type="button"
-          className={styles.ghostButton}
-          onClick={() => navigate('/login')}
-        >
-          Retour à la connexion
-        </button>
-      <button
-        type="submit"
-        disabled={forgotPasswordMutation.isLoading}
-      >
-        {forgotPasswordMutation.isLoading ? 'Envoi en cours...' : 'Envoyer'}
-      </button>
-      </div>
-      
-    </form>
+    <Container size="xs" h="100vh" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+      <Paper radius="md" p="xl" withBorder w="100%">
+        <Stack>
+          <Title order={1}>Mot de passe oublié</Title>
+          <Text>Entrez votre adresse email pour recevoir un lien de réinitialisation.</Text>
+          
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Stack>
+              <TextInput
+                label="Email"
+                placeholder="poro@example.com"
+                error={errors.email?.message}
+                {...register('email', {
+                  required: 'L\'email est requis',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'Adresse email invalide',
+                  },
+                })}
+              />
+              <Stack>
+                <Button variant="subtle" onClick={() => navigate('/login')} fullWidth>
+                  Retour à la connexion
+                </Button>
+                <Button type="submit" loading={forgotPasswordMutation.isLoading} fullWidth>
+                  {forgotPasswordMutation.isLoading ? 'Envoi en cours...' : 'Envoyer'}
+                </Button>
+              </Stack>
+            </Stack>
+          </form>
+        </Stack>
+      </Paper>
+    </Container>
   );
 };
 
