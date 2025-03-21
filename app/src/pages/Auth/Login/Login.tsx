@@ -7,7 +7,7 @@ import { DecodedToken } from '@/utils/tokenUtils';
 import apiClient from '@/services/apiService';
 import { ApiError } from '@/types/api';
 import toast from 'react-hot-toast';
-import styles from './Login.module.scss';
+import { TextInput, PasswordInput, Button, Stack, Text, Container, Paper, Title, Group, Anchor } from '@mantine/core';
 
 interface LoginFormInputs {
   identifier: string;
@@ -103,93 +103,77 @@ const Login: React.FC = () => {
 
   if (magicLinkSuccess) {
     return (
-      <div className={styles.container}>
-        <h1>Email envoyé !</h1>
-        <p>Un lien de connexion a été envoyé à votre adresse email. Veuillez vérifier votre boîte de réception.</p>
-        {!canResend ? (
-          <p className={styles.countdown}>Vous pourrez en demander un nouveau dans {countdown} secondes</p>
-        ) : (
-          <button
-            type="button"
-            onClick={handleMagicLink}
-            className={styles.magicLinkButton}
-          >
-            Renvoyer l'email
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={() => {
-            setMagicLinkSuccess(false);
-            setCountdown(60);
-            setCanResend(false);
-          }}
-          className={styles.linkButton}
-        >
-          Retour à la connexion
-        </button>
-      </div>
+      <Container size="xs" h="100vh" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <Paper radius="md" p="xl" withBorder w="100%">
+          <Stack>
+            <Title order={1}>Email envoyé !</Title>
+            <Text>Un lien de connexion a été envoyé à votre adresse email. Veuillez vérifier votre boîte de réception.</Text>
+            {!canResend ? (
+              <Text c="dimmed">Vous pourrez en demander un nouveau dans {countdown} secondes</Text>
+            ) : (
+              <Button variant="subtle" onClick={handleMagicLink} fullWidth>
+                Renvoyer l'email
+              </Button>
+            )}
+            <Button variant="subtle" onClick={() => {
+              setMagicLinkSuccess(false);
+              setCountdown(60);
+              setCanResend(false);
+            }} fullWidth>
+              Retour à la connexion
+            </Button>
+          </Stack>
+        </Paper>
+      </Container>
     );
   }
 
   return (
-    <div className={styles.container}>
-      <h1>Quel plaisir de te revoir</h1>
-      
-      <form onSubmit={handleLoginSubmit(onSubmit)}>
-        <div className={styles.inputContainer}>
-          <label htmlFor="identifier">Identifiant</label>
-          <input
-            id="identifier"
-            autoCapitalize="none"
-            autoComplete="username"
-            placeholder="poro"
-            className={loginErrors.identifier ? styles.error : ''}
-            {...registerLogin('identifier', { required: 'Ce champ est obligatoire' })}
-          />
-        </div>
-        <div className={styles.inputContainer}>
-          <label htmlFor="password">Mot de passe</label>
-          <input
-            id="password"
-            placeholder="********"
-            type="password"
-            autoComplete="current-password"
-            className={loginErrors.password ? styles.error : ''}
-            {...registerLogin('password', { required: 'Ce champ est obligatoire' })}
-          />
-        </div>
-        <div className={styles.buttonContainer}>
-          <button type="submit" disabled={loginMutation.isLoading}>
-            {loginMutation.isLoading ? 'Connexion...' : 'Connexion'}
-          </button>
-          <button
-            type="button"
-            onClick={handleMagicLink}
-          >
-            Se connecter sans mot de passe
-          </button>
-        </div>
-      </form>
+    <Container size="xs" h="100vh" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+      <Paper radius="md" p="xl" withBorder w="100%">
+        <Stack>
+          <Title order={1}>Quel plaisir de te revoir</Title>
+          
+          <form onSubmit={handleLoginSubmit(onSubmit)}>
+            <Stack>
+              <TextInput
+                label="Identifiant"
+                placeholder="poro"
+                error={loginErrors.identifier?.message}
+                {...registerLogin('identifier', { required: 'Ce champ est obligatoire' })}
+              />
+              <PasswordInput
+                label="Mot de passe"
+                placeholder="********"
+                error={loginErrors.password?.message}
+                {...registerLogin('password', { required: 'Ce champ est obligatoire' })}
+              />
+              <Stack>
+                <Button type="submit" loading={loginMutation.isLoading} fullWidth>
+                  {loginMutation.isLoading ? 'Connexion...' : 'Connexion'}
+                </Button>
+                <Button variant="light" onClick={handleMagicLink} fullWidth>
+                  Se connecter sans mot de passe
+                </Button>
+              </Stack>
+            </Stack>
+          </form>
 
-      <button
-        type="button"
-        onClick={() => navigate('/forgot-password')}
-        className={styles.linkButton}
-      >
-        Mot de passe oublié ?
-      </button>
-      <div className={styles.registerLink}>
-        <span>Pas encore membre ?</span>
-        <button
-          type="button"
-          onClick={() => navigate('/register')}
-          className={styles.registerButton}
-        >
-          Créer un compte
-        </button>
-      </div>
-    </div>
+          <Group justify="center">
+            <Anchor component="button" type="button" variant="subtle" onClick={() => navigate('/forgot-password')}>
+              Mot de passe oublié ?
+            </Anchor>
+          </Group>
+
+          <Group justify="center">
+            <Text size="sm">Pas encore membre ?</Text>
+            <Anchor component="button" type="button" variant="subtle" onClick={() => navigate('/register')}>
+              Créer un compte
+            </Anchor>
+          </Group>
+        </Stack>
+      </Paper>
+    </Container>
   );
 };
 

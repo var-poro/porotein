@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRegister } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import styles from './Register.module.scss';
+import { TextInput, PasswordInput, Button, Stack, Text, Container, Paper, Title, Group, Anchor } from '@mantine/core';
 
 interface RegisterFormInputs {
     username: string;
@@ -27,71 +27,67 @@ const Register: React.FC = () => {
 
     if (isRegistered) {
         return (
-            <div className={styles.container}>
-                <h1>Inscription réussie !</h1>
-                <p>Un email de confirmation a été envoyé à votre adresse email. Veuillez vérifier votre boîte de réception et cliquer sur le lien de confirmation pour activer votre compte.</p>
-                <button
-                    type="button"
-                    onClick={() => navigate('/login')}
-                    className={styles.linkButton}
-                >
-                    Retour à la connexion
-                </button>
-            </div>
+            <Container size="xs" h="100vh" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+                <Paper radius="md" p="xl" withBorder w="100%">
+                    <Stack>
+                        <Title order={1}>Inscription réussie !</Title>
+                        <Text>Un email de confirmation a été envoyé à votre adresse email. Veuillez vérifier votre boîte de réception et cliquer sur le lien de confirmation pour activer votre compte.</Text>
+                        <Button variant="subtle" onClick={() => navigate('/login')} fullWidth>
+                            Retour à la connexion
+                        </Button>
+                    </Stack>
+                </Paper>
+            </Container>
         );
     }
 
     return (
-        <form className={styles.container} onSubmit={handleSubmit(onSubmit)}>
-            <h1>Bienvenue sur Porotein !</h1>
-            <p>Crée ton compte pour commencer ton parcours</p>
-            <div className={styles.inputContainer}>
-                <label htmlFor="username">Nom d'utilisateur</label>
-                <input 
-                    id="username" 
-                    placeholder="poro"
-                    autoCapitalize="none"
-                    autoComplete="username"
-                    {...register('username', { required: true })} 
-                />
-                {errors.username && <span className={styles.error}>Ce champ est obligatoire</span>}
-            </div>
-            <div className={styles.inputContainer}>
-                <label htmlFor="email">Email</label>
-                <input 
-                    id="email" 
-                    type="email" 
-                    placeholder="poro@example.com"
-                    autoComplete="email"
-                    {...register('email', { required: true })} 
-                />
-                {errors.email && <span className={styles.error}>Ce champ est obligatoire</span>}
-            </div>
-            <div className={styles.inputContainer}>
-                <label htmlFor="password">Mot de passe</label>
-                <input 
-                    id="password" 
-                    type="password" 
-                    placeholder="********"
-                    autoComplete="new-password"
-                    {...register('password', { required: true })} 
-                />
-                {errors.password && <span className={styles.error}>Ce champ est obligatoire</span>}
-            </div>
-            <button type="submit" disabled={registerMutation.isLoading}>
-                {registerMutation.isLoading ? 'Inscription...' : 'Inscription'}
-            </button>
-            <div className={styles.links}>
-                <span>Déjà un compte ?</span>
-                <button
-                    type="button"
-                    onClick={() => navigate('/login')}
-                    className={styles.linkButton}
-                >
-                    Connecte-toi
-                </button>
-            </div>
-        </form>
+        <Container size="xs" h="100vh" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <Paper radius="md" p="xl" withBorder w="100%">
+                <Stack>
+                    <Title order={1}>Créer un compte</Title>
+                    
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        <Stack>
+                            <TextInput
+                                label="Nom d'utilisateur"
+                                placeholder="poro"
+                                error={errors.username?.message}
+                                {...register('username', { required: 'Ce champ est obligatoire' })}
+                            />
+                            <TextInput
+                                label="Email"
+                                placeholder="poro@example.com"
+                                error={errors.email?.message}
+                                {...register('email', {
+                                    required: 'Ce champ est obligatoire',
+                                    pattern: {
+                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                        message: 'Adresse email invalide',
+                                    },
+                                })}
+                            />
+                            <PasswordInput
+                                label="Mot de passe"
+                                placeholder="********"
+                                error={errors.password?.message}
+                                {...register('password', { required: 'Ce champ est obligatoire' })}
+                            />
+                            <Button type="submit" loading={registerMutation.isLoading} fullWidth>
+                                {registerMutation.isLoading ? 'Inscription...' : 'S\'inscrire'}
+                            </Button>
+                        </Stack>
+                    </form>
+
+                    <Group justify="center">
+                        <Text size="sm">Déjà un compte ?</Text>
+                        <Anchor component="button" type="button" variant="subtle" onClick={() => navigate('/login')}>
+                            Connecte-toi
+                        </Anchor>
+                    </Group>
+                </Stack>
+            </Paper>
+        </Container>
     );
 };
 
