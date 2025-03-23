@@ -26,8 +26,6 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
   const [repSets, setRepSets] = useLocalStorage(`repSets_${exercise._id}`, exercise.repSets);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [transitionCountdown, setTransitionCountdown] = useState(3);
   const exerciseRef = useRef<HTMLDivElement>(null);
   const transitionRef = useRef<number | null>(null);
 
