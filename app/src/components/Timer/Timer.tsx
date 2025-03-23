@@ -19,37 +19,73 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
     const savedAutoMode = localStorage.getItem(AUTO_MODE_KEY);
     return savedAutoMode ? JSON.parse(savedAutoMode) : false;
   });
+  
   const endTimeRef = useRef<number | null>(null);
   const frameRef = useRef<number | null>(null);
+  const currentTimeRef = useRef<number>(defaultValue);
+  const lastUpdateRef = useRef<number>(0);
+  const isInitializedRef = useRef(false);
 
+  // Single effect to handle all timer logic
   useEffect(() => {
-    const savedTimer = localStorage.getItem('timer_state');
-    if (savedTimer) {
-      try {
-        const { endTime, wasRunning } = JSON.parse(savedTimer);
-        if (endTime) {
-          const now = Date.now();
-          const remainingMs = Math.max(0, endTime - now);
-          const remainingSeconds = Math.ceil(remainingMs / 1000);
-          
-          if (remainingSeconds > 0) {
-            setSeconds(remainingSeconds);
-            setIsRunning(wasRunning);
-            if (wasRunning) {
-              endTimeRef.current = endTime;
-            }
-          } else {
-            localStorage.removeItem('timer_state');
-          }
-        }
-      } catch (error) {
-        console.error('Erreur lors de la restauration du timer:', error);
-        localStorage.removeItem('timer_state');
-      }
+    // Initialize timer only once
+    if (!isInitializedRef.current) {
+      currentTimeRef.current = defaultValue;
+      setSeconds(defaultValue);
+      localStorage.removeItem('timer_state');
+      isInitializedRef.current = true;
     }
-  }, []);
 
-  useEffect(() => {
+    const updateTimer = () => {
+      if (!isRunning || !endTimeRef.current) return;
+
+      const now = Date.now();
+      const remaining = Math.max(0, endTimeRef.current - now);
+      const newSeconds = Math.ceil(remaining / 1000);
+
+      // Only update if enough time has passed since last update
+      if (newSeconds !== currentTimeRef.current && now - lastUpdateRef.current >= 1000) {
+        currentTimeRef.current = newSeconds;
+        setSeconds(newSeconds);
+        lastUpdateRef.current = now;
+      }
+
+      if (newSeconds <= 0) {
+        setIsRunning(false);
+        if (frameRef.current) {
+          cancelAnimationFrame(frameRef.current);
+          frameRef.current = null;
+        }
+        localStorage.removeItem('timer_state');
+
+        if (isAutoMode) {
+          setTimeout(() => {
+            if (onComplete) {
+              onComplete();
+            }
+          }, 3000);
+        }
+        return;
+      }
+
+      frameRef.current = requestAnimationFrame(updateTimer);
+    };
+
+    // Initialize timer state
+    if (isRunning) {
+      if (!endTimeRef.current) {
+        endTimeRef.current = Date.now() + currentTimeRef.current * 1000;
+      }
+      frameRef.current = requestAnimationFrame(updateTimer);
+    } else {
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
+      }
+      endTimeRef.current = null;
+    }
+
+    // Save state to localStorage when running
     if (isRunning) {
       localStorage.setItem(
         'timer_state',
@@ -61,45 +97,6 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
     } else {
       localStorage.removeItem('timer_state');
     }
-  }, [isRunning, seconds]);
-
-  useEffect(() => {
-    const updateTimer = () => {
-      if (isRunning && endTimeRef.current) {
-        const now = Date.now();
-        const remaining = Math.max(0, endTimeRef.current - now);
-        const newSeconds = Math.ceil(remaining / 1000);
-
-        if (newSeconds !== seconds) {
-          setSeconds(newSeconds);
-        }
-
-        if (newSeconds <= 0) {
-          setIsRunning(false);
-          endTimeRef.current = null;
-          localStorage.removeItem('timer_state');
-          if (isAutoMode && onComplete) {
-            onComplete();
-          }
-        } else {
-          frameRef.current = requestAnimationFrame(updateTimer);
-        }
-      }
-    };
-
-    if (isRunning) {
-      if (!endTimeRef.current) {
-        endTimeRef.current = Date.now() + seconds * 1000;
-      }
-      frameRef.current = requestAnimationFrame(updateTimer);
-    } else {
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-        frameRef.current = null;
-      }
-      endTimeRef.current = null;
-      localStorage.removeItem('timer_state');
-    }
 
     return () => {
       if (frameRef.current) {
@@ -107,12 +104,12 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
         frameRef.current = null;
       }
     };
-  }, [isRunning, isAutoMode, onComplete, seconds]);
+  }, [isRunning, isAutoMode, onComplete, setSeconds, defaultValue]);
 
   const handleStart = () => {
-    if (!isRunning) {
+    if (!isRunning && currentTimeRef.current > 0) {
       setIsRunning(true);
-      endTimeRef.current = Date.now() + seconds * 1000;
+      endTimeRef.current = Date.now() + currentTimeRef.current * 1000;
     }
   };
 
@@ -124,14 +121,15 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
   };
 
   const handleReset = () => {
-    setIsRunning(false);
+    currentTimeRef.current = defaultValue;
     setSeconds(defaultValue);
-    endTimeRef.current = null;
+    endTimeRef.current = Date.now() + defaultValue * 1000;
     if (frameRef.current) {
       cancelAnimationFrame(frameRef.current);
       frameRef.current = null;
     }
     localStorage.removeItem('timer_state');
+    setIsRunning(true);
   };
 
   const toggleAutoMode = () => {
@@ -151,6 +149,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
   const handleTimeChange = (value: string) => {
     const [minutes, seconds] = value.split(':').map(Number);
     const totalSeconds = minutes * 60 + (seconds || 0);
+    currentTimeRef.current = totalSeconds;
     setSeconds(totalSeconds);
     if (isRunning) {
       endTimeRef.current = Date.now() + totalSeconds * 1000;
@@ -161,7 +160,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
     if (seconds <= 15) {
       return '#FF9800';
     }
-    return '#000000';
+    return 'var(--text-color)';
   };
 
   return (

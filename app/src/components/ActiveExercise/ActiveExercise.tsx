@@ -4,7 +4,7 @@ import apiClient from '@/services/apiService.ts';
 import styles from './ActiveExercise.module.scss';
 import { Muscle } from '@/types/Muscle.ts';
 import { Tag } from '@/types/Tag.ts';
-import { Exercise } from '@/types/Exercise.ts';
+import { Exercise, RepSet } from '@/types/Exercise.ts';
 import { Loading } from '@/components';
 import Timer from '@/components/Timer/Timer.tsx';
 import { BiChevronDown } from 'react-icons/bi';
@@ -27,7 +27,9 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [transitionCountdown, setTransitionCountdown] = useState(3);
   const exerciseRef = useRef<HTMLDivElement>(null);
+  const transitionRef = useRef<number | null>(null);
 
   const { data: muscles, isLoading: isMusclesLoading } = useQuery(
     'muscles',
@@ -105,7 +107,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
               exerciseId: exercise._id,
               name: exercise.name,
               duration: ex.duration || 0,
-              repSets: currentRepSets.map((repSet: any, index: number) => ({
+              repSets: currentRepSets.map((repSet: RepSet, index: number) => ({
                 repSetId: `${exercise._id}_${index}`,
                 repetitions: Number(repSet.repetitions) || 0,
                 weight: Number(repSet.weight) || 0,
@@ -133,8 +135,25 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
     if (!repSetIsDone) {
       setRepSetIsDone(true);
     } else {
+      // On met à jour l'index après avoir sauvegardé l'état actuel
+      const nextIndex = currentSeriesIndex + 1;
+      setCurrentSeriesIndex(nextIndex);
       setRepSetIsDone(false);
-      setCurrentSeriesIndex(currentSeriesIndex + 1);
+      
+      // On s'assure que les valeurs de la nouvelle série sont correctement initialisées
+      if (repSets[nextIndex]) {
+        setRepSets((prevRepSets: RepSet[]) => {
+          const newRepSets = [...prevRepSets];
+          // On s'assure que la nouvelle série a les bonnes valeurs par défaut
+          newRepSets[nextIndex] = {
+            ...newRepSets[nextIndex],
+            repetitions: newRepSets[nextIndex].repetitions || 0,
+            weight: newRepSets[nextIndex].weight || 0,
+            restTime: newRepSets[nextIndex].restTime || exercise.repSets[nextIndex].restTime
+          };
+          return newRepSets;
+        });
+      }
     }
     saveExerciseToLocal();
   };
@@ -143,10 +162,44 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
     if (repSetIsDone) {
       setRepSetIsDone(false);
     } else if (currentSeriesIndex > 0) {
-      setCurrentSeriesIndex(currentSeriesIndex - 1);
+      const prevIndex = currentSeriesIndex - 1;
+      setCurrentSeriesIndex(prevIndex);
       setRepSetIsDone(true);
+      
+      // On s'assure que les valeurs de la série précédente sont correctement restaurées
+      if (repSets[prevIndex]) {
+        setRepSets((prevRepSets: RepSet[]) => {
+          const newRepSets = [...prevRepSets];
+          // On restaure les valeurs de la série précédente
+          newRepSets[prevIndex] = {
+            ...newRepSets[prevIndex],
+            repetitions: newRepSets[prevIndex].repetitions || 0,
+            weight: newRepSets[prevIndex].weight || 0,
+            restTime: newRepSets[prevIndex].restTime || exercise.repSets[prevIndex].restTime
+          };
+          return newRepSets;
+        });
+      }
     }
     saveExerciseToLocal();
+  };
+
+  const handleTimerComplete = () => {
+    if (currentSeriesIndex + 1 === exercise.repSets.length) {
+      // Si c'est la dernière série, on passe directement à l'exercice suivant
+      nextExercise();
+    } else {
+      handleNextRepSet();
+    }
+  };
+
+  const handleManualNext = () => {
+    if (currentSeriesIndex + 1 === exercise.repSets.length) {
+      // Si c'est la dernière série, on passe directement à l'exercice suivant
+      nextExercise();
+    } else {
+      handleNextRepSet();
+    }
   };
 
   const handleStartExercise = () => {
@@ -185,12 +238,15 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
     setVideoLoaded(true);
   };
 
-  const handleNextExercise = () => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      nextExercise();
-    }, 3000);
-  };
+  // Nettoyage de l'intervalle lors du démontage
+  useEffect(() => {
+    return () => {
+      if (transitionRef.current) {
+        clearInterval(transitionRef.current);
+        transitionRef.current = null;
+      }
+    };
+  }, []);
 
   if (isMusclesLoading || isTagsLoading) return <Loading />;
 
@@ -258,7 +314,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
       {exerciseStarted && (
         <>
           <div className={styles.header}>
-            <h4>Série {repSetIsDone && currentSeriesIndex + 1 < exercise.repSets.length ? currentSeriesIndex + 2 : currentSeriesIndex + 1} </h4>
+            <h4>Série {currentSeriesIndex + 1}</h4>
             <small>/ {exercise.repSets.length}</small>
           </div>
           {repSetIsDone && 
@@ -273,20 +329,27 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
             <>
               {!repSetIsDone ? (
                 <RepSetInputs
+                  key={`repSet-${currentSeriesIndex}`}
                   repetitions={repSets[currentSeriesIndex]?.repetitions || 0}
-                  setRepetitions={(value) => {
-                    setRepSets((prevRepSets: any[]) => {
+                  setRepetitions={(value: number) => {
+                    setRepSets((prevRepSets: RepSet[]) => {
                       const newRepSets = [...prevRepSets];
-                      newRepSets[currentSeriesIndex].repetitions = value;
+                      newRepSets[currentSeriesIndex] = {
+                        ...newRepSets[currentSeriesIndex],
+                        repetitions: value
+                      };
                       return newRepSets;
                     });
                     saveExerciseToLocal();
                   }}
                   weight={repSets[currentSeriesIndex]?.weight || 0}
-                  setWeight={(value) => {
-                    setRepSets((prevRepSets: any[]) => {
+                  setWeight={(value: number) => {
+                    setRepSets((prevRepSets: RepSet[]) => {
                       const newRepSets = [...prevRepSets];
-                      newRepSets[currentSeriesIndex].weight = value;
+                      newRepSets[currentSeriesIndex] = {
+                        ...newRepSets[currentSeriesIndex],
+                        weight: value
+                      };
                       return newRepSets;
                     });
                     saveExerciseToLocal();
@@ -294,23 +357,21 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
                 />
               ) : (
                 <Timer
-                  seconds={repSets[currentSeriesIndex]?.restTime || 0}
-                  setSeconds={(value) => {
-                    setRepSets((prevRepSets: any[]) => {
+                  key={`timer-${currentSeriesIndex}`}
+                  seconds={repSets[currentSeriesIndex]?.restTime || exercise.repSets[currentSeriesIndex].restTime}
+                  setSeconds={(value: number) => {
+                    setRepSets((prevRepSets: RepSet[]) => {
                       const newRepSets = [...prevRepSets];
-                      newRepSets[currentSeriesIndex].restTime = value;
+                      newRepSets[currentSeriesIndex] = {
+                        ...newRepSets[currentSeriesIndex],
+                        restTime: value
+                      };
                       return newRepSets;
                     });
                     saveExerciseToLocal();
                   }}
-                  defaultValue={exercise.repSets?.[currentSeriesIndex].restTime}
-                  onComplete={() => {
-                    if (currentSeriesIndex + 1 === exercise.repSets.length) {
-                      handleNextExercise();
-                    } else {
-                      handleNextRepSet();
-                    }
-                  }}
+                  defaultValue={exercise.repSets[currentSeriesIndex].restTime}
+                  onComplete={handleTimerComplete}
                 />
               )}
             </>
@@ -323,8 +384,8 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
               {currentSeriesIndex + 1 !== exercise.repSets.length || !repSetIsDone ? (
                 <button onClick={handleNextRepSet}>Suivant</button>
               ) : (
-                <button onClick={handleNextExercise}>
-                  {isTransitioning ? 'Préparation...' : 'Terminer l\'exercice'}
+                <button onClick={handleManualNext}>
+                  Terminer l'exercice
                 </button>
               )}
             </div>

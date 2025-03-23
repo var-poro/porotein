@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { getUserData, updateUserData } from '@/services/userService';
 import styles from './Profile.module.scss';
@@ -16,6 +17,7 @@ interface ProfileFormInputs {
 
 const Profile: React.FC = () => {
   const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -76,6 +78,24 @@ const Profile: React.FC = () => {
             {...register('email', { required: true })}
           />
         </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="theme">Theme</label>
+          <select
+            id="theme"
+            value={theme}
+            onChange={(e) => setTheme(e.target.value as 'light' | 'dark' | 'auto' | 'energy-saver')}
+          >
+            <option value="auto">Automatique</option>
+            <option value="light">Mode clair</option>
+            <option value="dark">Mode sombre</option>
+            <option value="energy-saver">Mode économie d'énergie</option>
+          </select>
+          <small style={{ display: 'block', marginTop: '0.5rem', color: 'var(--text-secondary-color)' }}>
+            Le mode économie d'énergie utilise un noir absolu pour maximiser les économies d'énergie sur les écrans OLED/AMOLED.
+          </small>
+        </div>
+
         <div className={styles.buttonsContainer}>
           <button type="submit">Mettre à jour mon profil</button>
           <button type="button" onClick={handleLogout}>

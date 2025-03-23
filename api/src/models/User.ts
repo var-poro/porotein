@@ -19,6 +19,7 @@ interface IUser extends Document {
   username: string;
   email: string;
   password: string;
+  role: 'user' | 'admin';
   createdAt: Date;
   weightHistory: IWeightDetail[];
   measurementsHistory: IMeasurementDetail[];
@@ -27,8 +28,12 @@ interface IUser extends Document {
   resetPasswordExpires?: Date;
   emailVerificationToken?: string;
   emailVerified: boolean;
+  lastActivationEmailSent: Date;
+  lastPasswordResetEmailSent: Date;
   magicLinkToken?: string;
   magicLinkExpires?: Date;
+  isActive: boolean;
+  deleted?: boolean;
 }
 
 const weightDetailSchema = new Schema<IWeightDetail>({
@@ -46,6 +51,7 @@ const userSchema = new Schema<IUser>({
   username: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
   createdAt: { type: Date, default: Date.now },
   weightHistory: [weightDetailSchema],
   measurementsHistory: [measurementDetailSchema],
@@ -54,6 +60,8 @@ const userSchema = new Schema<IUser>({
   resetPasswordExpires: { type: Date },
   emailVerificationToken: { type: String },
   emailVerified: { type: Boolean, default: false },
+  lastActivationEmailSent: { type: Date },
+  lastPasswordResetEmailSent: { type: Date },
   magicLinkToken: {
     type: String,
     required: false
@@ -61,7 +69,9 @@ const userSchema = new Schema<IUser>({
   magicLinkExpires: {
     type: Date,
     required: false
-  }
+  },
+  isActive: { type: Boolean, default: true },
+  deleted: { type: Boolean, default: false }
 });
 
 const User = model<IUser>('User', userSchema);

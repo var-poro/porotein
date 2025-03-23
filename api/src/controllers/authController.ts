@@ -39,7 +39,8 @@ export const registerUser = async (req: Request, res: Response) => {
       email,
       password: hashedPassword,
       emailVerificationToken: hashedVerificationToken,
-      emailVerified: false
+      emailVerified: false,
+      role: 'user' // Par défaut, tous les nouveaux utilisateurs sont des utilisateurs normaux
     });
 
     await user.save();
@@ -63,7 +64,8 @@ export const registerUser = async (req: Request, res: Response) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        emailVerified: user.emailVerified
+        emailVerified: user.emailVerified,
+        role: user.role
       },
       accessToken
     });
@@ -103,7 +105,8 @@ export const verifyEmail = async (req: Request, res: Response) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        emailVerified: user.emailVerified
+        emailVerified: user.emailVerified,
+        role: user.role
       },
       accessToken
     });
@@ -135,7 +138,16 @@ export const loginUser = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    res.send({ user, accessToken });
+    res.send({
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        emailVerified: user.emailVerified,
+        role: user.role
+      },
+      accessToken
+    });
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).send({ error: error.message });
@@ -298,7 +310,8 @@ export const verifyMagicLink = async (req: Request, res: Response) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        emailVerified: user.emailVerified
+        emailVerified: user.emailVerified,
+        role: user.role
       },
       accessToken
     });

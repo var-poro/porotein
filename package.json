@@ -6,7 +6,8 @@
   "scripts": {
     "dev:api": "pnpm --filter api dev --host",
     "dev:app": "pnpm --filter app dev --host",
-    "dev": "concurrently \"pnpm run dev:api\" \"pnpm run dev:app\""
+    "dev:admin": "pnpm --filter admin dev --host",
+    "dev": "concurrently --kill-others-on-fail --prefix-colors \"cyan.bold,green.bold,blue.bold\" \"pnpm run dev:api\" \"pnpm run dev:app\" \"pnpm run dev:admin\""
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -14,7 +15,8 @@
     "@mantine/form": "^7.17.2",
     "@mantine/hooks": "^7.17.2",
     "@mantine/notifications": "^7.17.2",
-    "@tabler/icons-react": "^3.31.0",
+    "date-fns": "^4.1.0",
+    "react-icons": "^5.5.0",
     "web-push": "^3.6.7"
   }
 }
