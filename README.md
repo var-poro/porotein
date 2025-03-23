@@ -11,6 +11,7 @@ Porotein est une application complète de suivi d'entraînement qui permet aux u
 - [API Documentation](#api-documentation)
 - [Frontend Documentation](#frontend-documentation)
 - [Contribution](#contribution)
+- [Configuration des variables d'environnement](#configuration-des-variables-denvironnement)
 
 ## 🔍 Vue d'ensemble
 
@@ -203,6 +204,71 @@ Les contributions sont les bienvenues ! Pour contribuer :
 ## 📄 Licence
 
 Ce projet est sous licence [MIT](LICENSE).
+
+## Configuration des variables d'environnement
+
+## Structure des fichiers .env
+
+Le projet utilise trois types de fichiers .env :
+
+1. `.env.example` : Template avec les variables requises (committé dans le repo)
+2. `.env.local` : Configuration locale pour le développement (non committé)
+3. `.env.production` : Configuration de production (non committé)
+
+## Configuration locale
+
+Pour le développement local :
+
+1. Copier le fichier `.env.example` en `.env.local` dans chaque dossier (api, admin, app)
+2. Adapter les valeurs pour votre environnement local
+3. Les valeurs par défaut sont configurées pour fonctionner avec :
+   - API : http://localhost:4000
+   - Admin : http://localhost:5173
+   - App : http://localhost:5173
+
+## Configuration de production
+
+Pour la production :
+
+1. Créer un fichier `.env.production` dans chaque dossier
+2. Configurer les URLs de production :
+   - API : https://api.porotein.fr
+   - Admin : https://admin.porotein.fr
+   - App : https://porotein.fr
+
+## Variables d'environnement requises
+
+### API
+- `PORT` : Port du serveur (4000)
+- `NODE_ENV` : Environnement (development/production)
+- `JWT_SECRET` : Secret pour les tokens JWT
+- `JWT_REFRESH_SECRET` : Secret pour les tokens de rafraîchissement
+- `EMAIL_HOST` : Serveur SMTP
+- `EMAIL_PORT` : Port SMTP
+- `EMAIL_USER` : Email d'envoi
+- `EMAIL_PASSWORD` : Mot de passe email
+- `DB_HOST` : Hôte de la base de données
+- `DB_PORT` : Port de la base de données
+- `DB_NAME` : Nom de la base de données
+- `DB_USER` : Utilisateur de la base de données
+- `DB_PASSWORD` : Mot de passe de la base de données
+
+### Admin
+- `VITE_API_URL` : URL de l'API
+- `VITE_ADMIN_EMAIL` : Email de l'administrateur
+- `VITE_ADMIN_PASSWORD` : Mot de passe de l'administrateur
+
+### App
+- `VITE_API_BASE_URL` : URL de l'API
+- `VITE_APP_PORT` : Port de l'application
+- `VITE_APP_URL` : URL de l'application
+
+## Sécurité
+
+- Ne jamais commiter les fichiers `.env.local` ou `.env.production`
+- Utiliser des secrets différents pour chaque environnement
+- Ne pas partager les fichiers de configuration de production
+- Utiliser des mots de passe forts pour les secrets JWT et la base de données
 
 ---
 

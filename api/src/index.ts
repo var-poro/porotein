@@ -56,7 +56,16 @@ try {
 
     // Middleware CORS
     const corsOptions = {
-        origin: ['http://localhost:4173', "http://192.168.1.112:5173/", "http://192.168.1.67:5173", 'http://localhost:5173', 'https://porotein.fr'],
+        origin: [
+            'http://localhost:4173', 
+            "http://192.168.1.112:5173/", 
+            "http://192.168.1.67:5173", 
+            'http://localhost:5173', 
+            'https://porotein.fr',
+            'http://localhost:3000',
+            'http://localhost:3001',
+            'https://admin.porotein.fr'
+        ],
         credentials: true,
     };
     app.use(cors(corsOptions));

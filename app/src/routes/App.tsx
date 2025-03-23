@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import { Toaster } from 'react-hot-toast';
@@ -23,8 +24,16 @@ import Recapitulatif from '@/pages/ActiveSession/Recapitulatif.tsx';
 import AppStateHandler from '@/components/AppStateHandler/AppStateHandler.tsx';
 import VerifyEmail from '@/pages/Auth/VerifyEmail/VerifyEmail';
 import VerifyMagicLink from '@/pages/Auth/VerifyMagicLink/VerifyMagicLink';
+import { useTheme } from '@/context/ThemeContext';
+import Weight from '@/pages/Weight/Weight';
 
-function App() {
+const App: React.FC = () => {
+  const { isDarkMode } = useTheme();
+
+  React.useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
+
   return (
     <AuthProvider>
       <Router>
@@ -82,6 +91,7 @@ function App() {
 
             <Route path="/profile" element={<Profile />} />
             <Route path="/history" element={<History />} />
+            <Route path="/weight" element={<Weight />} />
 
             <Route path="/workout/:id" element={<ActiveSession />} />
             <Route path="/workout/:id/recap" element={<Recapitulatif />} />
@@ -90,6 +100,6 @@ function App() {
       </Router>
     </AuthProvider>
   );
-}
+};
 
 export default App;

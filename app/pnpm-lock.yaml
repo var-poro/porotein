@@ -17,6 +17,9 @@ importers:
       '@mantine/hooks':
         specifier: ^7.17.2
         version: 7.17.2(react@18.3.1)
+      '@mantine/styles':
+        specifier: ^6.0.22
+        version: 6.0.22(@emotion/react@11.14.0(@types/react@18.3.3)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-query-devtools':
         specifier: ^5.45.0
         version: 5.45.0(@tanstack/react-query@5.45.0(react@18.3.1))(react@18.3.1)
@@ -1007,6 +1010,13 @@ packages:
     peerDependencies:
       react: ^18.x || ^19.x
 
+  '@mantine/styles@6.0.22':
+    resolution: {integrity: sha512-Rud/IQp2EFYDiP4csRy2XBrho/Ct+W2/b+XbvCRTeQTmpFy/NfAKm/TWJa5zPvuv/iLTjGkVos9SHw/DteESpQ==}
+    peerDependencies:
+      '@emotion/react': '>=11.9.0'
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -1500,6 +1510,10 @@ packages:
     resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
     engines: {node: '>= 8.10.0'}
 
+  clsx@1.1.1:
+    resolution: {integrity: sha512-6/bPho624p3S2pMyvP5kKBPXnI3ufHLObBFCfgx+LkeR5lg2XYy2hqZqUf45ypD8COn2bhgGJSUE+l5dhNBieA==}
+    engines: {node: '>=6'}
+
   clsx@1.2.1:
     resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
     engines: {node: '>=6'}
@@ -1559,6 +1573,9 @@ packages:
   crypto-random-string@2.0.0:
     resolution: {integrity: sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==}
     engines: {node: '>=8'}
+
+  csstype@3.0.9:
+    resolution: {integrity: sha512-rpw6JPxK6Rfg1zLOYCSwle2GFOOsnjmDYDaBwEcwoOg4qlsIVCN789VkBZDJAGi4T07gI4YSutR43t9Zz4Lzuw==}
 
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
@@ -4249,6 +4266,14 @@ snapshots:
     dependencies:
       react: 18.3.1
 
+  '@mantine/styles@6.0.22(@emotion/react@11.14.0(@types/react@18.3.3)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@emotion/react': 11.14.0(@types/react@18.3.3)(react@18.3.1)
+      clsx: 1.1.1
+      csstype: 3.0.9
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -4783,6 +4808,8 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
+  clsx@1.1.1: {}
+
   clsx@1.2.1: {}
 
   clsx@2.1.1: {}
@@ -4834,6 +4861,8 @@ snapshots:
       which: 2.0.2
 
   crypto-random-string@2.0.0: {}
+
+  csstype@3.0.9: {}
 
   csstype@3.1.3: {}
 

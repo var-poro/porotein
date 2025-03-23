@@ -154,6 +154,25 @@
     gap: var(--spacing);
     width: 100%;
     justify-content: center;
+
+    button {
+      &.transitioning {
+        animation: pulse 1s infinite;
+        color: #FF9800;
+      }
+    }
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 
   .exerciseNavigation {

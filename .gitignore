@@ -15,7 +15,8 @@
 # Environment files
 .env
 .env.local
-.env.*
+.env.*.local
+!.env.example
 
 # Logs
 logs
@@ -34,3 +35,42 @@ Thumbs.db
 # Cache
 .npm
 .eslintcache
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+
+# Production
+dist/
+build/
+dev-dist/
+
+# Misc
+.DS_Store
+*.pem
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# SSL certificates
+.cert/
+*.pem
+*.key
+*.crt

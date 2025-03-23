@@ -160,7 +160,8 @@ export const getRegistrationEmailTemplate = (username: string, verificationToken
             line-height: 1.6;
             color: #333;
             margin: 0;
-            padding: 0;
+            overflow: auto;
+            padding: 20px;
             background-color: #f5f5f5;
           }
           
