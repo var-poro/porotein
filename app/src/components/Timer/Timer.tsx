@@ -26,9 +26,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
   const lastUpdateRef = useRef<number>(0);
   const isInitializedRef = useRef(false);
 
-  // Single effect to handle all timer logic
   useEffect(() => {
-    // Initialize timer only once
     if (!isInitializedRef.current) {
       currentTimeRef.current = defaultValue;
       setSeconds(defaultValue);
@@ -43,7 +41,6 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
       const remaining = Math.max(0, endTimeRef.current - now);
       const newSeconds = Math.ceil(remaining / 1000);
 
-      // Only update if enough time has passed since last update
       if (newSeconds !== currentTimeRef.current && now - lastUpdateRef.current >= 1000) {
         currentTimeRef.current = newSeconds;
         setSeconds(newSeconds);
@@ -71,7 +68,6 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
       frameRef.current = requestAnimationFrame(updateTimer);
     };
 
-    // Initialize timer state
     if (isRunning) {
       if (!endTimeRef.current) {
         endTimeRef.current = Date.now() + currentTimeRef.current * 1000;
@@ -85,7 +81,6 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
       endTimeRef.current = null;
     }
 
-    // Save state to localStorage when running
     if (isRunning) {
       localStorage.setItem(
         'timer_state',

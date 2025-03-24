@@ -211,15 +211,12 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
   };
 
   useEffect(() => {
-    // Ne pas réinitialiser l'état si nous avons déjà un état sauvegardé
-    if (!localStorage.getItem(`exerciseState_${exercise._id}`)) {
-      setCurrentSeriesIndex(0);
-      setExerciseStarted(false);
-      setRepSetIsDone(false);
-      setIsCollapsed(false);
-      setVideoLoaded(false);
-      setRepSets(exercise.repSets);
-    }
+    // Réinitialiser uniquement l'état visuel
+    setCurrentSeriesIndex(0);
+    setExerciseStarted(false);
+    setRepSetIsDone(false);
+    setIsCollapsed(false);
+    setVideoLoaded(false);
   }, [exercise]);
 
   useEffect(() => {
