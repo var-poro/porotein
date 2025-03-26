@@ -1,6 +1,5 @@
 import { Table, Group, Checkbox } from '@mantine/core';
 import { FiArrowUp, FiArrowDown } from 'react-icons/fi';
-import { User } from '../../services/userService';
 import { SortField } from '../../hooks/useUserFilters';
 
 interface UserTableHeaderProps {

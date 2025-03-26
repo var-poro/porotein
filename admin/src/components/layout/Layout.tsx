@@ -35,7 +35,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       }}
     >
       <AppShell.Header>
-        <Header opened={opened} onToggle={() => setOpened(!opened)} />
+        <Header isCollapsed={collapsed} opened={opened} onToggle={() => setOpened(!opened)} onToggleCollapse={() => setCollapsed(!collapsed)} />
       </AppShell.Header>
 
       <AppShell.Navbar p="md">
