@@ -87,7 +87,11 @@ const Users: React.FC = () => {
         if (!formData.password) {
           throw new Error('Password is required for new users');
         }
-        await createUser(formData);
+        await createUser({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password as string
+        });
       }
       setOpened(false);
       setSelectedUser(null);

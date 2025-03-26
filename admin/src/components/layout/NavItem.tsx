@@ -3,7 +3,6 @@ import { NavItemProps } from './types';
 
 export const NavItem: React.FC<NavItemProps> = ({
   label,
-  path,
   icon: Icon,
   isActive,
   isCollapsed,

@@ -52,6 +52,11 @@ jobs:
           pnpm install
           pnpm build
 
+          echo "🔧 Construction de l'application admin..."
+          cd /var/www/porotein/admin
+          pnpm install
+          pnpm build
+
           echo "🔄 Redémarrage des services..."
           # Arrêter les services existants
           pm2 stop all || true
@@ -65,12 +70,30 @@ jobs:
           echo "✅ Vérification de l'état des processus PM2..."
           pm2 status
 
+          # Vérifier que l'app répond correctement
+          echo "🔍 Vérification de l'app..."
+          curl -s -o /dev/null -w "%{http_code}" https://porotein.fr/ || {
+            echo "❌ L'app ne répond pas correctement"
+            echo "📋 Logs de l'app:"
+            pm2 logs app --lines 50
+            exit 1
+          }
+            
           # Vérifier que l'API répond correctement
           echo "🔍 Vérification de l'API..."
           curl -s -o /dev/null -w "%{http_code}" https://api.porotein.fr/ || {
             echo "❌ L'API ne répond pas correctement"
             echo "📋 Logs de l'API:"
             pm2 logs api --lines 50
+            exit 1
+          }
+
+          # Vérifier que l'admin répond correctement
+          echo "🔍 Vérification de l'admin..."
+          curl -s -o /dev/null -w "%{http_code}" https://admin.porotein.fr/ || {
+            echo "❌ L'admin ne répond pas correctement"
+            echo "📋 Logs de l'admin:"
+            pm2 logs admin --lines 50
             exit 1
           }
 

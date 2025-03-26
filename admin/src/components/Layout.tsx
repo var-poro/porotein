@@ -7,10 +7,8 @@ import {
   useMantineTheme,
   useMantineColorScheme,
   ActionIcon,
-  rem,
   Image,
   Tooltip,
-  Transition,
   Box,
 } from '@mantine/core';
 import { 
