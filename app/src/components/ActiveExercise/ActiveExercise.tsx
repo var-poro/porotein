@@ -243,6 +243,32 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
     };
   }, []);
 
+  // S'assurer que les repSets correspondent à l'exercice actuel
+  useEffect(() => {
+    const savedRepSets = localStorage.getItem(`repSets_${exercise._id}`);
+    if (!savedRepSets) {
+      // Si pas de données sauvegardées, on utilise les valeurs par défaut
+      setRepSets(exercise.repSets);
+    } else {
+      try {
+        // Si des données existent, on s'assure qu'elles ont la bonne structure
+        const parsedRepSets = JSON.parse(savedRepSets);
+        const updatedRepSets = exercise.repSets.map((defaultRepSet, index) => ({
+          ...defaultRepSet,
+          ...(parsedRepSets[index] || {}),
+          repetitions: parsedRepSets[index]?.repetitions || 0,
+          weight: parsedRepSets[index]?.weight || 0,
+          restTime: parsedRepSets[index]?.restTime || defaultRepSet.restTime
+        }));
+        setRepSets(updatedRepSets);
+      } catch (error) {
+        // En cas d'erreur de parsing, on utilise les valeurs par défaut
+        console.error(`Erreur lors du parsing des repSets pour l'exercice ${exercise._id}:`, error);
+        setRepSets(exercise.repSets);
+      }
+    }
+  }, [exercise._id]);
+
   if (isMusclesLoading || isTagsLoading) return <Loading />;
 
   return (
