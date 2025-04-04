@@ -11,6 +11,7 @@ export const getUserData = async (): Promise<User> => {
 export interface UpdateUserDataInput {
   username?: string;
   email?: string;
+  activeProgram?: string;
   connectedDevice?: {
     type: 'apple-watch' | 'garmin' | 'fitbit' | null;
     enabled: boolean;

@@ -1,5 +1,5 @@
 import { Select } from '@mantine/core'
-import { locales, defaultLocale } from '../i18n'
+import { locales } from '../i18n'
 import { useTranslation } from '../hooks/useTranslation'
 
 export const LanguageSelector = () => {
