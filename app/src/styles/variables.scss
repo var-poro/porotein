@@ -8,6 +8,7 @@ $font-family: 'Arial, sans-serif';
   --font-family: 'Poppins';
   --header-font-family: 'Prata';
   --primary-color: var(--mantine-color-blue-6);
+  --primary-color-rgb: 51, 154, 240;
   --border-radius: var(--mantine-radius-md);
   --border-color: var(--mantine-color-gray-3);
   
@@ -22,10 +23,17 @@ $font-family: 'Arial, sans-serif';
   // Surface colors
   --surface-color: var(--mantine-color-body);
   --surface-hover-color: var(--mantine-color-gray-0);
+  --surface-selected-color: var(--mantine-color-blue-0);
   
   // Text colors
   --text-color: var(--mantine-color-dark-9);
   --text-secondary-color: var(--mantine-color-gray-6);
+  
+  // Button colors
+  --button-bg-color: var(--primary-color);
+  --button-text-color: white;
+  --button-border-color: var(--primary-color);
+  --button-hover-opacity: 0.9;
   
   --delete-color: var(--mantine-color-red-6);
   --background-color: var(--mantine-color-gray-0);
@@ -35,15 +43,22 @@ $font-family: 'Arial, sans-serif';
 
 [data-theme="dark"] {
   --primary-color: var(--mantine-color-blue-4);
+  --primary-color-rgb: 99, 179, 237;
   --border-color: var(--mantine-color-dark-4);
   
   // Surface colors
   --surface-color: var(--mantine-color-dark-7);
   --surface-hover-color: var(--mantine-color-dark-6);
+  --surface-selected-color: var(--mantine-color-blue-9);
   
   // Text colors
   --text-color: var(--mantine-color-gray-0);
   --text-secondary-color: var(--mantine-color-gray-4);
+  
+  // Button colors
+  --button-bg-color: var(--primary-color);
+  --button-text-color: white;
+  --button-border-color: var(--primary-color);
   
   --background-color: var(--mantine-color-dark-8);
   --box-shadow: var(--mantine-shadow-md);
@@ -51,15 +66,23 @@ $font-family: 'Arial, sans-serif';
 
 [data-theme="energy-saver"] {
   --primary-color: #ffffff;
-  --border-color: #c2c2c2;
+  --primary-color-rgb: 255, 255, 255;
+  --border-color: #333333;
   
   // Surface colors
   --surface-color: #000000;
   --surface-hover-color: #000000;
+  --surface-selected-color: #1a1a1a;
   
   // Text colors
   --text-color: #ffffff;
-  --text-secondary-color: #ffffff;
+  --text-secondary-color: #cccccc;
+  
+  // Button colors
+  --button-bg-color: #ffffff;
+  --button-text-color: #000000;
+  --button-border-color: #ffffff;
+  --button-hover-opacity: 0.8;
   
   --background-color: #000000;
   --box-shadow: none;
@@ -77,20 +100,20 @@ $font-family: 'Arial, sans-serif';
 
   // Simplification des bordures
   input, select, button {
-    border: 1px solid #ffffff;
+    border: 1px solid #333333;
     background-color: #000000;
     color: #ffffff;
   }
 
   // Suppression des effets de survol
   button:hover {
-    opacity: 0.8;
+    opacity: var(--button-hover-opacity);
   }
 
   // Suppression des ombres et des effets de profondeur
   .weightSection, .profileForm {
     box-shadow: none;
-    border: 1px solid #ffffff;
+    border: 1px solid #333333;
   }
 }
 

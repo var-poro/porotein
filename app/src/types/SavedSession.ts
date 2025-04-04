@@ -11,7 +11,10 @@ export interface SavedSession extends Session {
 
 export interface SavedExercise extends Exercise {
   duration: number;
-  exerciseId: string;
+  exerciseId: {
+    _id: string;
+    id: string;
+  };
   exercise: Exercise;
   savedRepSets: SavedRepSet[]
 }
