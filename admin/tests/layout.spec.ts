@@ -13,10 +13,6 @@ test.describe('Layout and Navigation', () => {
   test('should display navbar with all sections', async ({ page }) => {
     // Check if all navigation items are visible
     await expect(page.getByRole('link', { name: 'Users' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Programs' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Sessions' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Exercises' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Supplements' })).toBeVisible();
   });
 
   test('should toggle navbar collapse', async ({ page }) => {

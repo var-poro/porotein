@@ -4,14 +4,6 @@
   padding: var(--spacing);
 }
 
-.weightSection {
-  margin: var(--spacing) 0;
-  padding: var(--spacing);
-  background-color: var(--surface-color);
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-}
-
 .profileForm {
   background-color: var(--surface-color);
   padding: var(--spacing);
@@ -51,20 +43,112 @@
 
   button {
     padding: 0.5rem 1rem;
-    border: none;
+    border: 1px solid var(--button-border-color);
     border-radius: var(--border-radius);
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
     cursor: pointer;
     transition: opacity 0.2s ease;
 
     &:hover {
-      opacity: 0.9;
+      opacity: var(--button-hover-opacity);
     }
 
     &[type="button"] {
       background-color: var(--delete-color);
+      border-color: var(--delete-color);
     }
   }
+}
+
+.connectedDeviceContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.deviceSelect {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.toggleLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+}
+
+.themeOptions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.themeOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--surface-color);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+
+  &.selected {
+    border-color: var(--primary-color);
+    background-color: var(--surface-selected-color);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border: 2px solid var(--primary-color);
+      border-radius: var(--border-radius);
+      pointer-events: none;
+    }
+  }
+}
+
+.themeIcon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.themeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.themeLabel {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.themeDescription {
+  font-size: 0.875rem;
+  color: var(--text-secondary-color);
 }
 

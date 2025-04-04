@@ -8,7 +8,16 @@ export const getUserData = async (): Promise<User> => {
   return response.data;
 };
 
-export const updateUserData = async (data: Partial<User>): Promise<User> => {
+export interface UpdateUserDataInput {
+  username?: string;
+  email?: string;
+  connectedDevice?: {
+    type: 'apple-watch' | 'garmin' | 'fitbit' | null;
+    enabled: boolean;
+  };
+}
+
+export const updateUserData = async (data: UpdateUserDataInput): Promise<User> => {
   const response = await apiClient.put('/users/current', data);
   return response.data;
 };

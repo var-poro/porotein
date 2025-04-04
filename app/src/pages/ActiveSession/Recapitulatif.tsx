@@ -10,6 +10,7 @@ import { ExerciseChart } from '@/components/ExerciseChart/ExerciseChart';
 import { BiLineChart, BiUpArrowAlt, BiDownArrowAlt, BiMinus, BiTrash } from 'react-icons/bi';
 import { SavedExercise, SavedSession } from '@/types/SavedSession';
 import toast from 'react-hot-toast';
+import { useCallback, useMemo, useEffect, useRef } from 'react';
 
 const Recapitulatif = () => {
   const { id } = useParams();
@@ -18,28 +19,47 @@ const Recapitulatif = () => {
   const queryClient = useQueryClient();
   const isJustFinished = location.state?.justFinished;
   const { data: user } = useGetCurrentUser();
+  const notificationShown = useRef(false);
+
+  // Effet pour afficher la notification de la montre connectée
+  useEffect(() => {
+    if (isJustFinished && user?.connectedDevice?.enabled && user?.connectedDevice?.type && !notificationShown.current) {
+      const deviceName = {
+        'apple-watch': 'Apple Watch',
+        'garmin': 'Garmin',
+        'fitbit': 'Fitbit'
+      }[user.connectedDevice.type];
+
+      toast(
+        `N'oubliez pas d'arrêter le suivi sur votre ${deviceName} !`,
+        {
+          duration: 5000,
+          icon: '⌚️',
+          style: {
+            background: 'var(--background-color)',
+            color: 'var(--text-color)',
+            border: '1px solid var(--border-color)',
+          },
+        }
+      );
+      notificationShown.current = true;
+    }
+  }, [isJustFinished, user?.connectedDevice]);
 
   const { data: savedSessionData, isLoading: sessionLoading, isError: sessionError } = useQuery(
     ['savedSession', id],
     () => getSavedSessionById(id || ''),
     { 
       enabled: !!id,
-      retry: false // Ne pas réessayer si la requête échoue
+      retry: false
     }
   );
 
-  console.log('savedSessionData:', savedSessionData);
-
   const { data: historicalSessions, isLoading: historyLoading } = useQuery(
     ['sessionHistory', savedSessionData?.session?._id],
-    () => {
-      console.log('Fetching history for sessionId:', savedSessionData?.session?._id);
-      return getSavedSessionsBySessionId(savedSessionData?.session?._id || '');
-    },
+    () => getSavedSessionsBySessionId(savedSessionData?.session?._id || ''),
     { enabled: !!savedSessionData?.session?._id }
   );
-
-  console.log('historicalSessions:', historicalSessions);
 
   const deleteMutation = useMutation(deleteSavedSession, {
     onSuccess: () => {
@@ -52,13 +72,96 @@ const Recapitulatif = () => {
     }
   });
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette séance ?')) {
       deleteMutation.mutate(id || '');
     }
-  };
+  }, [deleteMutation, id]);
 
   const sessionData = savedSessionData?.session;
+
+  const prepareExerciseHistory = useCallback((exerciseId: string) => {
+    if (!historicalSessions) {
+      console.log('No historical sessions available');
+      return [];
+    }
+    
+    console.log('Processing exercise history for ID:', exerciseId);
+    console.log('Historical sessions:', JSON.stringify(historicalSessions, null, 2));
+    
+    return historicalSessions.map((savedSession: SavedSession) => {
+      console.log('Processing session:', JSON.stringify(savedSession, null, 2));
+      console.log('Session exercises:', JSON.stringify(savedSession.savedExercises, null, 2));
+      
+      // Chercher l'exercice dans les exercices sauvegardés
+      const exercise = savedSession.savedExercises?.find(savedExercise => {
+        const exId = savedExercise.exerciseId?._id || savedExercise.exerciseId?.id || savedExercise._id;
+        console.log('Comparing exercise IDs:', { 
+          exId, 
+          exerciseId,
+          exerciseIdType: typeof exerciseId,
+          exIdType: typeof exId,
+          savedExercise: JSON.stringify(savedExercise, null, 2)
+        });
+        return exId?.toString() === exerciseId?.toString();
+      });
+      
+      if (!exercise) {
+        console.log('Exercise not found in session');
+        return null;
+      }
+      
+      console.log('Found exercise:', JSON.stringify(exercise, null, 2));
+      console.log('Exercise repSets:', JSON.stringify(exercise.repSets, null, 2));
+      
+      // Calculer les moyennes en s'assurant que les valeurs sont des nombres
+      const avgReps = exercise.repSets?.reduce((sum, set) => 
+        sum + (Number(set.repetitions) || 0), 0) / (exercise.repSets?.length || 1);
+      const avgWeight = exercise.repSets?.reduce((sum, set) => 
+        sum + (Number(set.weight) || 0), 0) / (exercise.repSets?.length || 1);
+      
+      const result = {
+        date: new Date(savedSession.performedAt).toLocaleDateString(),
+        reps: Math.round(avgReps),
+        weight: Math.round(avgWeight)
+      };
+      
+      console.log('Prepared data point:', result);
+      return result;
+    }).filter(Boolean);
+  }, [historicalSessions]);
+
+  // Ajouter un log pour voir les exercices de la session actuelle
+  useEffect(() => {
+    if (savedSessionData?.savedExercises) {
+      console.log('Current session exercises:', JSON.stringify(savedSessionData.savedExercises, null, 2));
+      console.log('First exercise:', JSON.stringify(savedSessionData.savedExercises[0], null, 2));
+      console.log('First exercise exerciseId:', JSON.stringify(savedSessionData.savedExercises[0]?.exerciseId, null, 2));
+      console.log('First exercise exerciseId type:', typeof savedSessionData.savedExercises[0]?.exerciseId);
+    }
+  }, [savedSessionData]);
+
+  const metrics = useMemo(() => {
+    if (!historicalSessions || historicalSessions.length < 2) return null;
+  
+    const previousSession = historicalSessions[1];
+    const currentSession = savedSessionData;
+  
+    const totalVolume = (session: SavedSession) => 
+      session.savedExercises?.reduce((acc, ex) => 
+        acc + ex.repSets?.reduce((setAcc: number, set: { weight: number; repetitions: number }) => 
+          setAcc + (set.weight * set.repetitions), 0), 0);
+  
+    const currentVolume = totalVolume(currentSession);
+    const previousVolume = totalVolume(previousSession);
+    const volumeChange = ((currentVolume - previousVolume) / previousVolume) * 100;
+  
+    return {
+      volumeChange: Math.round(volumeChange * 10) / 10,
+      totalVolume: Math.round(currentVolume),
+      previousVolume: Math.round(previousVolume)
+    };
+  }, [historicalSessions, savedSessionData]);
 
   if (sessionLoading || historyLoading) return <Loading />;
 
@@ -76,74 +179,6 @@ const Recapitulatif = () => {
       </div>
     );
   }
-
-  const prepareExerciseHistory = (exerciseId: string) => {
-    console.log('Historical Sessions:', historicalSessions);
-    console.log('Exercise ID:', exerciseId);
-    
-    const history = historicalSessions?.map((savedSession: SavedSession) => {
-      console.log('Processing session:', savedSession);
-      const exercise = savedSession.exercises?.find(savedExercise => {
-        const exId = savedExercise._id;
-        console.log('Comparing IDs:', exId, exerciseId);
-        return exId?.toString() === exerciseId?.toString();
-      });
-      
-      if (!exercise) {
-        console.log('Exercise not found in session');
-        return null;
-      }
-      
-      console.log('Found exercise:', exercise);
-      const avgReps = exercise.repSets?.reduce((sum, set) => sum + set.repetitions, 0) / exercise.repSets?.length;
-      const avgWeight = exercise.repSets?.reduce((sum, set) => sum + set.weight, 0) / exercise.repSets?.length;
-      
-      const result = {
-        date: new Date(savedSession.performedAt).toLocaleDateString(),
-        reps: Math.round(avgReps),
-        weight: Math.round(avgWeight)
-      };
-      console.log('Prepared data point:', result);
-      return result;
-    }).filter(Boolean);
-    
-    console.log('Final history for exercise:', history);
-    return history;
-  };
-
-  interface Session {
-    savedExercises: Array<{
-      savedRepSets: Array<{
-        weight: number;
-        repetitions: number;
-      }>;
-    }>;
-    performedAt: string;
-  }
-
-  const calculatePerformanceMetrics = () => {
-    if (!historicalSessions || historicalSessions.length < 2) return null;
-  
-    const previousSession = historicalSessions[1];
-    const currentSession = savedSessionData;
-  
-    const totalVolume = (session: Session) => 
-      session.savedExercises?.reduce((acc, ex) => 
-        acc + ex.savedRepSets?.reduce((setAcc: number, set: { weight: number; repetitions: number }) => 
-          setAcc + (set.weight * set.repetitions), 0), 0);
-  
-    const currentVolume = totalVolume(currentSession);
-    const previousVolume = totalVolume(previousSession);
-    const volumeChange = ((currentVolume - previousVolume) / previousVolume) * 100;
-  
-    return {
-      volumeChange: Math.round(volumeChange * 10) / 10,
-      totalVolume: Math.round(currentVolume),
-      previousVolume: Math.round(previousVolume)
-    };
-  };
-
-  const metrics = calculatePerformanceMetrics();
 
   return (
     <div className={styles.recapContainer}>
@@ -179,7 +214,8 @@ const Recapitulatif = () => {
         />
         <Tile
           title="Séries totales"
-          value={savedSessionData?.savedExercises?.reduce((acc: number, ex: { repSets: Array<{ weight: number; repetitions: number }> }) => acc + ex.repSets?.length, 0)}
+          value={savedSessionData?.savedExercises?.reduce((acc: number, ex: SavedExercise) => 
+            acc + (ex.repSets?.length || 0), 0)}
           icon="stats"
         />
         <Tile
@@ -215,13 +251,30 @@ const Recapitulatif = () => {
 
       <div className={styles.exerciseCharts}>
         <h2>Progression par exercice</h2>
-        {savedSessionData?.savedExercises?.map((exercise: SavedExercise) => (
-          <ExerciseChart
-            key={exercise.exerciseId}
-            name={exercise.name}
-            history={prepareExerciseHistory(exercise.exerciseId)}
-          />
-        ))}
+        {savedSessionData?.savedExercises?.map((exercise: SavedExercise) => {
+          // Get the exercise ID, handling both frontend and backend data structures
+          const exerciseId = typeof exercise.exerciseId === 'object' 
+            ? exercise.exerciseId?._id || exercise.exerciseId?.id 
+            : exercise.exerciseId;
+            
+          if (!exerciseId) {
+            console.warn('Exercise missing ID:', exercise);
+            return null;
+          }
+          console.log('Rendering ExerciseChart for exercise:', { 
+            name: exercise.name, 
+            exerciseId,
+            exerciseIdType: typeof exerciseId,
+            exercise: JSON.stringify(exercise, null, 2)
+          });
+          return (
+            <ExerciseChart
+              key={exerciseId}
+              name={exercise.name}
+              history={prepareExerciseHistory(exerciseId)}
+            />
+          );
+        })}
       </div>
     </div>
   );
