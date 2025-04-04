@@ -4,7 +4,7 @@ import Session from './Session';
 import Exercise from './Exercise';
 
 interface ISavedSession extends Document {
-  _id?: Types.ObjectId;
+  _id: Types.ObjectId;
   userId: Types.ObjectId;
   sessionId: Types.ObjectId;
   programId: Types.ObjectId;
