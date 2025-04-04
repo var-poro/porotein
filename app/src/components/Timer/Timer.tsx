@@ -1,137 +1,34 @@
-import { FC, useEffect, useState, useRef } from 'react';
+import { FC } from 'react';
 import styles from './Timer.module.scss';
 import { PiPauseBold, PiTriangleBold } from 'react-icons/pi';
 import { GrPowerReset } from 'react-icons/gr';
 import { IoMdInfinite } from 'react-icons/io';
-
-const AUTO_MODE_KEY = 'timer_auto_mode';
+import { useTimer } from './hooks/useTimer';
 
 type Props = {
   seconds: number;
-  setSeconds: (value: number) => void;
   defaultValue: number;
   onComplete?: () => void;
+  onCountdownStart?: () => void;
+  onTimeChange?: (newSeconds: number, isRunning: boolean) => void;
 };
 
-const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => {
-  const [isRunning, setIsRunning] = useState(true);
-  const [isAutoMode, setIsAutoMode] = useState(() => {
-    const savedAutoMode = localStorage.getItem(AUTO_MODE_KEY);
-    return savedAutoMode ? JSON.parse(savedAutoMode) : false;
+const Timer: FC<Props> = ({ seconds, defaultValue, onComplete, onCountdownStart, onTimeChange }) => {
+  const {
+    isRunning,
+    isAutoMode,
+    start,
+    pause,
+    reset,
+    toggleAutoMode,
+    handleTimeChange,
+  } = useTimer({
+    seconds,
+    defaultValue,
+    onComplete,
+    onCountdownStart,
+    onTimeChange,
   });
-  
-  const endTimeRef = useRef<number | null>(null);
-  const frameRef = useRef<number | null>(null);
-  const currentTimeRef = useRef<number>(defaultValue);
-  const lastUpdateRef = useRef<number>(0);
-  const isInitializedRef = useRef(false);
-
-  useEffect(() => {
-    if (!isInitializedRef.current) {
-      currentTimeRef.current = defaultValue;
-      setSeconds(defaultValue);
-      localStorage.removeItem('timer_state');
-      isInitializedRef.current = true;
-    }
-
-    const updateTimer = () => {
-      if (!isRunning || !endTimeRef.current) return;
-
-      const now = Date.now();
-      const remaining = Math.max(0, endTimeRef.current - now);
-      const newSeconds = Math.ceil(remaining / 1000);
-
-      if (newSeconds !== currentTimeRef.current && now - lastUpdateRef.current >= 1000) {
-        currentTimeRef.current = newSeconds;
-        setSeconds(newSeconds);
-        lastUpdateRef.current = now;
-      }
-
-      if (newSeconds <= 0) {
-        setIsRunning(false);
-        if (frameRef.current) {
-          cancelAnimationFrame(frameRef.current);
-          frameRef.current = null;
-        }
-        localStorage.removeItem('timer_state');
-
-        if (isAutoMode) {
-          setTimeout(() => {
-            if (onComplete) {
-              onComplete();
-            }
-          }, 3000);
-        }
-        return;
-      }
-
-      frameRef.current = requestAnimationFrame(updateTimer);
-    };
-
-    if (isRunning) {
-      if (!endTimeRef.current) {
-        endTimeRef.current = Date.now() + currentTimeRef.current * 1000;
-      }
-      frameRef.current = requestAnimationFrame(updateTimer);
-    } else {
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-        frameRef.current = null;
-      }
-      endTimeRef.current = null;
-    }
-
-    if (isRunning) {
-      localStorage.setItem(
-        'timer_state',
-        JSON.stringify({
-          endTime: endTimeRef.current,
-          wasRunning: isRunning
-        })
-      );
-    } else {
-      localStorage.removeItem('timer_state');
-    }
-
-    return () => {
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-        frameRef.current = null;
-      }
-    };
-  }, [isRunning, isAutoMode, onComplete, setSeconds, defaultValue]);
-
-  const handleStart = () => {
-    if (!isRunning && currentTimeRef.current > 0) {
-      setIsRunning(true);
-      endTimeRef.current = Date.now() + currentTimeRef.current * 1000;
-    }
-  };
-
-  const handlePause = () => {
-    if (isRunning) {
-      setIsRunning(false);
-      localStorage.removeItem('timer_state');
-    }
-  };
-
-  const handleReset = () => {
-    currentTimeRef.current = defaultValue;
-    setSeconds(defaultValue);
-    endTimeRef.current = Date.now() + defaultValue * 1000;
-    if (frameRef.current) {
-      cancelAnimationFrame(frameRef.current);
-      frameRef.current = null;
-    }
-    localStorage.removeItem('timer_state');
-    setIsRunning(true);
-  };
-
-  const toggleAutoMode = () => {
-    const newAutoMode = !isAutoMode;
-    setIsAutoMode(newAutoMode);
-    localStorage.setItem(AUTO_MODE_KEY, JSON.stringify(newAutoMode));
-  };
 
   const convertSecondsToTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -139,16 +36,6 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
       .padStart(2, '0');
     const secs = (seconds % 60).toString().padStart(2, '0');
     return `${mins}:${secs}`;
-  };
-
-  const handleTimeChange = (value: string) => {
-    const [minutes, seconds] = value.split(':').map(Number);
-    const totalSeconds = minutes * 60 + (seconds || 0);
-    currentTimeRef.current = totalSeconds;
-    setSeconds(totalSeconds);
-    if (isRunning) {
-      endTimeRef.current = Date.now() + totalSeconds * 1000;
-    }
   };
 
   const getTimerColor = () => {
@@ -190,7 +77,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
           <div className={styles.buttonsContainer}>
             {!isRunning ? (
               <div 
-                onClick={handleStart}
+                onClick={start}
                 aria-label="Démarrer le timer"
                 className={styles.iconButton}
               >
@@ -198,7 +85,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
               </div>
             ) : (
               <div 
-                onClick={handlePause}
+                onClick={pause}
                 aria-label="Mettre en pause"
                 className={styles.iconButton}
               >
@@ -206,7 +93,7 @@ const Timer: FC<Props> = ({ seconds, setSeconds, defaultValue, onComplete }) => 
               </div>
             )}
             <div 
-              onClick={handleReset}
+              onClick={reset}
               aria-label="Réinitialiser le timer"
               className={styles.iconButton}
             >
