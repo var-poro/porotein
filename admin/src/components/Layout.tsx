@@ -12,14 +12,8 @@ import {
   Box,
 } from '@mantine/core';
 import { 
-  PiSun, 
-  PiMoon, 
   PiSignOut, 
   PiUsers, 
-  PiBook, 
-  PiCalendar, 
-  PiBarbell, 
-  PiPackage,
   PiCaretLeft,
   PiCaretRight,
 } from 'react-icons/pi';
@@ -34,7 +28,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const theme = useMantineTheme();
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const { colorScheme,  } = useMantineColorScheme();
   const [opened, setOpened] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(false);
   const { logout } = useAuth();

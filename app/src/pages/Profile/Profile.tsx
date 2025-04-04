@@ -16,20 +16,18 @@ interface ProfileFormInputs {
 }
 
 const ThemeOption: React.FC<{
-  value: string;
   icon: string;
   label: string;
   description: string;
   selected: boolean;
   onClick: () => void;
-}> = ({ value, icon, label, description, selected, onClick }) => (
+}> = ({ icon, label, description, selected, onClick }) => (
   <div 
     className={`${styles.themeOption} ${selected ? styles.selected : ''}`}
     onClick={onClick}
     role="button"
     tabIndex={0}
     onKeyPress={(e) => e.key === 'Enter' && onClick()}
-    aria-selected={selected}
   >
     <span className={styles.themeIcon}>{icon}</span>
     <div className={styles.themeInfo}>
@@ -128,7 +126,6 @@ const Profile: React.FC = () => {
           <label>Thème de l'application</label>
           <div className={styles.themeOptions}>
             <ThemeOption
-              value="auto"
               icon="🌓"
               label="Automatique"
               description="S'adapte à votre système"
@@ -136,7 +133,6 @@ const Profile: React.FC = () => {
               onClick={() => setTheme('auto')}
             />
             <ThemeOption
-              value="light"
               icon="☀️"
               label="Mode clair"
               description="Thème clair optimisé pour la journée"
@@ -144,7 +140,6 @@ const Profile: React.FC = () => {
               onClick={() => setTheme('light')}
             />
             <ThemeOption
-              value="dark"
               icon="🌙"
               label="Mode sombre"
               description="Thème sombre pour une meilleure expérience nocturne"
@@ -152,7 +147,6 @@ const Profile: React.FC = () => {
               onClick={() => setTheme('dark')}
             />
             <ThemeOption
-              value="energy-saver"
               icon="🔋"
               label="Mode économie d'énergie"
               description="Optimisé pour les écrans OLED/AMOLED"

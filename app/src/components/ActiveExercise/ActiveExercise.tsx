@@ -30,7 +30,6 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
   const transitionRef = useRef<number | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
-  const [isRunning, setIsRunning] = useState(false);
 
   const { data: muscles, isLoading: isMusclesLoading } = useQuery(
     'muscles',

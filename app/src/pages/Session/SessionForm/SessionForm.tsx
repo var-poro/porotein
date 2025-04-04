@@ -1,19 +1,14 @@
-import { BiChevronLeft, BiDumbbell, BiPlus } from 'react-icons/bi';
-import styles from './SessionForm.module.scss';
-import { LiaDumbbellSolid } from 'react-icons/lia';
-import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { BiChevronLeft, BiDumbbell, BiPlus } from 'react-icons/bi';
+import { LiaDumbbellSolid } from 'react-icons/lia';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import {
-  createSession,
-  deleteSession,
-  getSessionById,
-  updateSession,
-} from '@/services/sessionService';
-import { useGetCurrentUser } from '@/utils/useGetCurrentUser';
-import { Program } from '@/types/Program';
+import { getSessionById, createSession, updateSession, deleteSession } from '@/services/sessionService';
+import { Session } from '@/types/Session';
+import { Exercise } from '@/types/Exercise';
 import { Loading } from '@/components';
-import { Session } from '@/types/Session.ts';
+import styles from './SessionForm.module.scss';
+import { useGetCurrentUser } from '@/utils/useGetCurrentUser';
 
 const SessionForm = () => {
   const navigate = useNavigate();
@@ -22,7 +17,7 @@ const SessionForm = () => {
   const { data: user, isLoading: userLoading } = useGetCurrentUser();
   const [sessionName, setSessionName] = useState('');
   const [sessionDescription, setSessionDescription] = useState('');
-  const [exercises, setExercises] = useState<any[]>([]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
 
   const { data: sessionData, isLoading: sessionLoading } = useQuery(
     ['session', id],
@@ -66,7 +61,7 @@ const SessionForm = () => {
       name: sessionName,
       description: sessionDescription,
       userId: user?._id,
-      programId: (user?.activeProgram as Program)._id,
+      programId: user?.activeProgram || '',
     };
     if (id) {
       updateMutation.mutate(sessionToSaveData as Session);
@@ -108,7 +103,7 @@ const SessionForm = () => {
         <div className={styles.exercisesContainer}>
           <h4>Exercices</h4>
           <div className={styles.exercisesList}>
-            {exercises.map((exercise: any, index: number) => (
+            {exercises.map((exercise: Exercise, index: number) => (
               <div key={index} className={styles.exercise}>
                 <div className={styles.exerciseText}>
                   {index % 2 ? (
