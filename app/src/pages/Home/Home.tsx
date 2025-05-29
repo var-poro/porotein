@@ -40,11 +40,8 @@ const Home: React.FC = () => {
   useEffect(() => {
     if (userData) {
       setUser(userData);
-      if (
-        typeof userData.activeProgram !== 'string' &&
-        userData?.activeProgram?._id
-      ) {
-        setActiveProgram(userData.activeProgram._id);
+      if (userData.activeProgram) {
+        setActiveProgram(userData.activeProgram);
       }
     }
   }, [userData]);
@@ -93,8 +90,8 @@ const Home: React.FC = () => {
       ) : (
         <NoSessions
           programName={
-            typeof user?.activeProgram !== 'string'
-              ? user?.activeProgram?.name || ''
+            user?.activeProgram
+              ? programs?.find(p => p._id === user.activeProgram)?.name || ''
               : ''
           }
           onCreateSession={handleCreateSession}

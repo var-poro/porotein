@@ -1,22 +1,50 @@
 {
-  "devDependencies": {
-    "@types/web-push": "^3.6.4",
-    "concurrently": "^9.1.2"
-  },
+  "name": "porotein",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev:api": "pnpm --filter api dev --host",
     "dev:app": "pnpm --filter app dev --host",
     "dev:admin": "pnpm --filter admin dev --host",
-    "dev": "concurrently --kill-others-on-fail --prefix-colors \"cyan.bold,green.bold,blue.bold\" \"pnpm run dev:api\" \"pnpm run dev:app\" \"pnpm run dev:admin\""
+    "dev": "concurrently --kill-others-on-fail --prefix-colors \"cyan.bold,green.bold,blue.bold\" \"pnpm run dev:api\" \"pnpm run dev:app\" \"pnpm run dev:admin\"",
+    "build:app": "pnpm --filter app build",
+    "build:admin": "pnpm --filter admin build",
+    "build": "concurrently --kill-others-on-fail --prefix-colors \"cyan.bold,green.bold\" \"pnpm run build:app\" \"pnpm run build:admin\"",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:headed": "playwright test --headed",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@lingui/conf": "^5.3.0",
+    "@playwright/test": "^1.51.1",
+    "@types/web-push": "^3.6.4",
+    "concurrently": "^9.1.2",
+    "dotenv": "^16.4.7"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
+    "@lingui/cli": "^5.3.0",
+    "@lingui/core": "^5.3.0",
+    "@lingui/macro": "^5.3.0",
+    "@lingui/react": "^5.3.0",
     "@mantine/core": "^7.17.2",
     "@mantine/form": "^7.17.2",
     "@mantine/hooks": "^7.17.2",
     "@mantine/notifications": "^7.17.2",
     "date-fns": "^4.1.0",
+    "make-plural": "^7.4.0",
     "react-icons": "^5.5.0",
     "web-push": "^3.6.7"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "react",
+        "react-dom"
+      ]
+    }
   }
 }

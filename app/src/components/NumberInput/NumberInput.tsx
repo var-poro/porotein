@@ -58,6 +58,7 @@ const NumberInput: FC<Props> = ({ value, setValue, min = 0 }) => {
   return (
     <div className={styles.numberInputContainer}>
       <input
+        title="NumberInput"
         type="tel"
         value={value}
         onChange={(e) => {
@@ -69,13 +70,13 @@ const NumberInput: FC<Props> = ({ value, setValue, min = 0 }) => {
         <BiMinus
           onTouchStart={() => startChanging('decrease')}
           onTouchEnd={stopChanging}
-          onContextMenu={(e) => e.preventDefault()}
+          onContextMenu={(e: React.MouseEvent<SVGElement>) => e.preventDefault()}
           aria-label="Decrease value"
         />
         <BiPlus
           onTouchStart={() => startChanging('increase')}
           onTouchEnd={stopChanging}
-          onContextMenu={(e) => e.preventDefault()}
+          onContextMenu={(e: React.MouseEvent<SVGElement>) => e.preventDefault()}
           aria-label="Increase value"
         />
       </div>

@@ -28,6 +28,7 @@ const Login: React.FC = () => {
   const [magicLinkSuccess, setMagicLinkSuccess] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [isMagicLinkLoading, setIsMagicLinkLoading] = useState(false);
 
   const identifier = watch('identifier');
 
@@ -48,6 +49,11 @@ const Login: React.FC = () => {
     }
     return () => clearInterval(timer);
   }, [magicLinkSuccess, countdown]);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     const loadingToast = toast.loading('Connexion en cours...');
@@ -70,7 +76,8 @@ const Login: React.FC = () => {
         setError('identifier', { type: 'manual' });
         setError('password', { type: 'manual' });
       } else {
-        toast.error(`Une erreur est survenue. Veuillez réessayer.`, {
+        const errorMessage = apiError.response?.data?.message || apiError.response?.data?.error || 'Une erreur est survenue. Veuillez réessayer.';
+        toast.error(errorMessage, {
           id: loadingToast,
         });
       }
@@ -84,6 +91,12 @@ const Login: React.FC = () => {
       return;
     }
 
+    if (!validateEmail(identifier)) {
+      setError('identifier', { type: 'manual', message: 'Format d\'email invalide' });
+      return;
+    }
+
+    setIsMagicLinkLoading(true);
     const loadingToast = toast.loading('Envoi du lien de connexion...');
     try {
       await apiClient.post('/auth/magic-link', { email: identifier });
@@ -95,9 +108,12 @@ const Login: React.FC = () => {
       });
     } catch (error) {
       const apiError = error as ApiError;
-      toast.error(apiError.response?.data?.message || 'Une erreur est survenue lors de l\'envoi du lien.', {
+      const errorMessage = apiError.response?.data?.message || apiError.response?.data?.error || 'Une erreur est survenue lors de l\'envoi du lien.';
+      toast.error(errorMessage, {
         id: loadingToast,
       });
+    } finally {
+      setIsMagicLinkLoading(false);
     }
   };
 
@@ -140,19 +156,32 @@ const Login: React.FC = () => {
                 label="Identifiant"
                 placeholder="poro"
                 error={loginErrors.identifier?.message}
+                disabled={loginMutation.isLoading}
                 {...registerLogin('identifier', { required: 'Ce champ est obligatoire' })}
               />
               <PasswordInput
                 label="Mot de passe"
                 placeholder="********"
                 error={loginErrors.password?.message}
+                disabled={loginMutation.isLoading}
                 {...registerLogin('password', { required: 'Ce champ est obligatoire' })}
               />
               <Stack>
-                <Button type="submit" loading={loginMutation.isLoading} fullWidth>
+                <Button 
+                  type="submit" 
+                  loading={loginMutation.isLoading} 
+                  disabled={loginMutation.isLoading}
+                  fullWidth
+                >
                   {loginMutation.isLoading ? 'Connexion...' : 'Connexion'}
                 </Button>
-                <Button variant="light" onClick={handleMagicLink} fullWidth>
+                <Button 
+                  variant="light" 
+                  onClick={handleMagicLink} 
+                  loading={isMagicLinkLoading}
+                  disabled={isMagicLinkLoading || loginMutation.isLoading}
+                  fullWidth
+                >
                   Se connecter sans mot de passe
                 </Button>
               </Stack>

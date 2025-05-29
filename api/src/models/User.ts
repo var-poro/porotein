@@ -14,6 +14,11 @@ interface IMeasurementDetail {
   date: Date;
 }
 
+interface IConnectedDevice {
+  type: 'apple-watch' | 'garmin' | 'fitbit' | null;
+  enabled: boolean;
+}
+
 interface IUser extends Document {
   _id: Schema.Types.ObjectId;
   username: string;
@@ -34,6 +39,7 @@ interface IUser extends Document {
   magicLinkExpires?: Date;
   isActive: boolean;
   deleted?: boolean;
+  connectedDevice: IConnectedDevice;
 }
 
 const weightDetailSchema = new Schema<IWeightDetail>({
@@ -71,7 +77,11 @@ const userSchema = new Schema<IUser>({
     required: false
   },
   isActive: { type: Boolean, default: true },
-  deleted: { type: Boolean, default: false }
+  deleted: { type: Boolean, default: false },
+  connectedDevice: {
+    type: { type: String, enum: ['apple-watch', 'garmin', 'fitbit', null], default: null },
+    enabled: { type: Boolean, default: false }
+  }
 });
 
 const User = model<IUser>('User', userSchema);

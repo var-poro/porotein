@@ -46,14 +46,14 @@ jobs:
           cd /var/www/porotein/app
           pnpm install
           pnpm build
-
-          echo "🔧 Construction de l'API backend..."
-          cd /var/www/porotein/api
+          
+          echo "🔧 Construction de l'application admin..."
+          cd /var/www/porotein/admin
           pnpm install
           pnpm build
 
-          echo "🔧 Construction de l'application admin..."
-          cd /var/www/porotein/admin
+          echo "🔧 Construction de l'API backend..."
+          cd /var/www/porotein/api
           pnpm install
           pnpm build
 

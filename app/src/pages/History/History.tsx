@@ -11,20 +11,25 @@ import { formatDuration } from '@/utils/formatDuration.ts';
 import { HiOutlineViewList } from'react-icons/hi';
 import { CiCalendar } from 'react-icons/ci'
 import { SavedSession } from '@/types/SavedSession';
+import WeightChart from '@/pages/Weight/components/WeightChart';
+import { getWeightHistory } from '@/services/weightService';
+import { WeightDetail } from '@/types/Weight';
 
 const History = () => {
+  const [activeTab, setActiveTab] = useState<'history' | 'body'>('history');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('calendar');
   const [filter, setFilter] = useState<'week' | 'month' | 'all'>('month');
-  const { data = [], isLoading } = useQuery(['savedSessions', filter], 
+  const { data = [], isLoading: sessionsLoading } = useQuery(['savedSessions', filter], 
     () => getSavedSessions(filter)
   );
+  const { data: weightHistory = [], isLoading: weightLoading } = useQuery<WeightDetail[]>('weightHistory', getWeightHistory);
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
 
   const toggleSession = (sessionId: string) => {
     setExpandedSessionId(expandedSessionId === sessionId ? null : sessionId);
   };
 
-  if (isLoading) {
+  if (sessionsLoading || weightLoading) {
     return <Loading />;
   }
 
@@ -104,85 +109,108 @@ const History = () => {
     <div className={classes.historyContainer}>
       <h1>Historique des séances</h1>
       
-      <div className={classes.statsGrid}>
-        <HistoryTile
-          icon={FaCalendarCheck}
-          value={stats.current.sessionsCount}
-          label="Séances"
-          trend={stats.trends.sessionsCount}
-        />
-        <HistoryTile
-          icon={FaDumbbell}
-          value={stats.current.exercisesCount}
-          label="Exercices"
-          trend={stats.trends.exercisesCount}
-        />
-        <HistoryTile
-          icon={FaClock}
-          value={formatDuration(stats.current.totalDuration)}
-          label="Temps total"
-          trend={stats.trends.totalDuration}
-          formatTrend={(value) => formatDuration(Math.abs(value))}
-        />
-        <HistoryTile
-          icon={FaFire}
-          value={stats.current.streak}
-          label={`jour${stats.current.streak > 1 ? 's' : ''} consécutif${stats.current.streak > 1 ? 's' : ''}`}
-        />
+      <div className={classes.tabs}>
+        <button 
+          className={activeTab === 'history' ? classes.active : ''}
+          onClick={() => setActiveTab('history')}
+        >
+          Historique de séances
+        </button>
+        <button 
+          className={activeTab === 'body' ? classes.active : ''}
+          onClick={() => setActiveTab('body')}
+        >
+          Suivi corporel
+        </button>
       </div>
 
-      <div className={classes.controlsRow}>
-        <div className={classes.filters}>
-          <button
-            onClick={() => setFilter('week')}
-            className={filter === 'week' ? classes.active : ''}
-          >
-            Semaine
-          </button>
-          <button
-            onClick={() => setFilter('month')}
-            className={filter === 'month' ? classes.active : ''}
-          >
-            Mois
-          </button>
-          <button
-            onClick={() => setFilter('all')}
-            className={filter === 'all' ? classes.active : ''}
-          >
-            Tout
-          </button>
-        </div>
-    
-        <div className={classes.viewControls}>
-          <button 
-            onClick={() => setViewMode('list')}
-            className={viewMode === 'list' ? classes.active : ''}
-            aria-label="Vue liste"
-          >
-            <HiOutlineViewList />
-          </button>
-          <button 
-            onClick={() => setViewMode('calendar')}
-            className={viewMode === 'calendar' ? classes.active : ''}
-            aria-label="Vue calendrier"
-          >
-            <CiCalendar />
-          </button>
-        </div>
-      </div>
+      {activeTab === 'history' ? (
+        <>
+          <div className={classes.statsGrid}>
+            <HistoryTile
+              icon={FaCalendarCheck}
+              value={stats.current.sessionsCount}
+              label="Séances"
+              trend={stats.trends.sessionsCount}
+            />
+            <HistoryTile
+              icon={FaDumbbell}
+              value={stats.current.exercisesCount}
+              label="Exercices"
+              trend={stats.trends.exercisesCount}
+            />
+            <HistoryTile
+              icon={FaClock}
+              value={formatDuration(stats.current.totalDuration)}
+              label="Temps total"
+              trend={stats.trends.totalDuration}
+              formatTrend={(value) => formatDuration(Math.abs(value))}
+            />
+            <HistoryTile
+              icon={FaFire}
+              value={stats.current.streak}
+              label={`jour${stats.current.streak > 1 ? 's' : ''} consécutif${stats.current.streak > 1 ? 's' : ''}`}
+            />
+          </div>
 
-      {viewMode === 'list' ? (
-        <ListView 
-          data={data}
-          expandedSessionId={expandedSessionId}
-          toggleSession={toggleSession}
-        />
+          <div className={classes.controlsRow}>
+            <div className={classes.filters}>
+              <button
+                onClick={() => setFilter('week')}
+                className={filter === 'week' ? classes.active : ''}
+              >
+                Semaine
+              </button>
+              <button
+                onClick={() => setFilter('month')}
+                className={filter === 'month' ? classes.active : ''}
+              >
+                Mois
+              </button>
+              <button
+                onClick={() => setFilter('all')}
+                className={filter === 'all' ? classes.active : ''}
+              >
+                Tout
+              </button>
+            </div>
+        
+            <div className={classes.viewControls}>
+              <button 
+                onClick={() => setViewMode('list')}
+                className={viewMode === 'list' ? classes.active : ''}
+                aria-label="Vue liste"
+              >
+                <HiOutlineViewList />
+              </button>
+              <button 
+                onClick={() => setViewMode('calendar')}
+                className={viewMode === 'calendar' ? classes.active : ''}
+                aria-label="Vue calendrier"
+              >
+                <CiCalendar />
+              </button>
+            </div>
+          </div>
+
+          {viewMode === 'list' ? (
+            <ListView 
+              data={data}
+              expandedSessionId={expandedSessionId}
+              toggleSession={toggleSession}
+            />
+          ) : (
+            <CalendarView 
+              data={data}
+              onSelectSession={toggleSession}
+              filter={filter}
+            />
+          )}
+        </>
       ) : (
-        <CalendarView 
-          data={data}
-          onSelectSession={toggleSession}
-          filter={filter}
-        />
+        <div className={classes.bodyTracking}>
+          <WeightChart data={weightHistory} />
+        </div>
       )}
     </div>
   );

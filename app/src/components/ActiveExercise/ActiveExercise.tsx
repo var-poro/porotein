@@ -7,7 +7,7 @@ import { Tag } from '@/types/Tag.ts';
 import { Exercise, RepSet } from '@/types/Exercise.ts';
 import { Loading } from '@/components';
 import Timer from '@/components/Timer/Timer.tsx';
-import { BiChevronDown } from 'react-icons/bi';
+import { BiChevronDown, BiChevronLeft, BiChevronRight } from 'react-icons/bi';
 import RepSetInputs from '@/components/RepSetInputs/RepSetInputs.tsx';
 import YoutubeVideo from '@/components/YoutubeVideo/YoutubeVideo.tsx';
 import { useLocalStorage } from '@/utils/useLocalStorage.ts';
@@ -28,6 +28,8 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
   const [videoLoaded, setVideoLoaded] = useState(false);
   const exerciseRef = useRef<HTMLDivElement>(null);
   const transitionRef = useRef<number | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: muscles, isLoading: isMusclesLoading } = useQuery(
     'muscles',
@@ -243,6 +245,56 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
     };
   }, []);
 
+  // S'assurer que les repSets correspondent à l'exercice actuel
+  useEffect(() => {
+    const savedRepSets = localStorage.getItem(`repSets_${exercise._id}`);
+    if (!savedRepSets) {
+      // Si pas de données sauvegardées, on utilise les valeurs par défaut
+      setRepSets(exercise.repSets);
+    } else {
+      try {
+        // Si des données existent, on s'assure qu'elles ont la bonne structure
+        const parsedRepSets = JSON.parse(savedRepSets);
+        const updatedRepSets = exercise.repSets.map((defaultRepSet, index) => ({
+          ...defaultRepSet,
+          ...(parsedRepSets[index] || {}),
+          repetitions: parsedRepSets[index]?.repetitions || 0,
+          weight: parsedRepSets[index]?.weight || 0,
+          restTime: parsedRepSets[index]?.restTime || defaultRepSet.restTime
+        }));
+        setRepSets(updatedRepSets);
+      } catch (error) {
+        // En cas d'erreur de parsing, on utilise les valeurs par défaut
+        console.error(`Erreur lors du parsing des repSets pour l'exercice ${exercise._id}:`, error);
+        setRepSets(exercise.repSets);
+      }
+    }
+  }, [exercise._id]);
+
+  const startCountdown = () => {
+    setCountdown(3);
+    countdownRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === null || prev <= 1) {
+          if (countdownRef.current) {
+            clearInterval(countdownRef.current);
+            countdownRef.current = null;
+          }
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+      }
+    };
+  }, []);
+
   if (isMusclesLoading || isTagsLoading) return <Loading />;
 
   return (
@@ -268,12 +320,20 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
         )}
         {!exerciseStarted && (
           <div className={styles.buttonsContainer}>
-            <button onClick={handleStartExercise}>Démarrer</button>
             <div className={styles.navigationButtons}>
               {hasPrevious && (
-                <span onClick={previousExercise}>Exercice précédent</span>
+                <button onClick={previousExercise} disabled={!hasPrevious}>
+                  <BiChevronLeft />
+                  Précédent
+                </button>
               )}
-              <span onClick={nextExercise}>Passer l'exercice</span>
+              <button onClick={handleStartExercise} className={styles.startButton}>
+                Démarrer
+              </button>
+              <button onClick={nextExercise}>
+                Suivant
+                <BiChevronRight />
+              </button>
             </div>
           </div>
         )}
@@ -354,19 +414,21 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
                 <Timer
                   key={`timer-${currentSeriesIndex}`}
                   seconds={repSets[currentSeriesIndex]?.restTime || exercise.repSets[currentSeriesIndex].restTime}
-                  setSeconds={(value: number) => {
-                    setRepSets((prevRepSets: RepSet[]) => {
-                      const newRepSets = [...prevRepSets];
-                      newRepSets[currentSeriesIndex] = {
-                        ...newRepSets[currentSeriesIndex],
-                        restTime: value
-                      };
-                      return newRepSets;
-                    });
-                    saveExerciseToLocal();
-                  }}
                   defaultValue={exercise.repSets[currentSeriesIndex].restTime}
                   onComplete={handleTimerComplete}
+                  onCountdownStart={startCountdown}
+                  onTimeChange={(newSeconds, isRunning) => {
+                    if (newSeconds > 0 || !isRunning) {
+                      setRepSets((prevRepSets: RepSet[]) => {
+                        const newRepSets = [...prevRepSets];
+                        newRepSets[currentSeriesIndex] = {
+                          ...newRepSets[currentSeriesIndex],
+                          restTime: newSeconds
+                        };
+                        return newRepSets;
+                      });
+                    }
+                  }}
                 />
               )}
             </>
@@ -377,7 +439,10 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
                 <button onClick={handlePreviousRepSet}>Précédent</button>
               )}
               {currentSeriesIndex + 1 !== exercise.repSets.length || !repSetIsDone ? (
-                <button onClick={handleNextRepSet}>Suivant</button>
+                <button onClick={handleNextRepSet}>
+                  Suivant 
+                  {countdown !== null && `(${countdown})`}
+                </button>
               ) : (
                 <button onClick={handleManualNext}>
                   Terminer l'exercice

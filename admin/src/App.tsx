@@ -5,12 +5,13 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import Layout from './components/Layout'
 import { Login } from './pages/Login'
 import Users from './pages/Users'
+import { Trans } from '@lingui/react/macro'
 
 function AppRoutes() {
   const { user, loading } = useAuth()
 
   if (loading) {
-    return null // ou un composant de chargement
+    return <div><Trans>Loading...</Trans></div>
   }
 
   if (!user) {

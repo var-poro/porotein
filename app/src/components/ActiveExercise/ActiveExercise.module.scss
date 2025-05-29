@@ -13,10 +13,6 @@
     align-items: center;
     cursor: pointer;
 
-    svg {
-      transition: 200ms;
-    }
-
     h3 {
       margin: 0;
     }
@@ -39,7 +35,6 @@
     flex-direction: column;
     gap: calc(var(--spacing) / 2);
     overflow: hidden;
-    transition: height 0.3s ease-in-out;
   }
 
   .tagsContainer {
@@ -131,21 +126,38 @@
     * {
       font-size: 1rem;
     }
-
-    button {
-      margin: 0;
-    }
   }
 
   .navigationButtons {
     display: flex;
     gap: var(--spacing);
-    margin-top: calc(var(--spacing) / 2);
+    width: 100%;
+    max-width: 600px;
     
-    span {
-      color: var(--primary-color);
-      text-decoration: underline;
+    button {
+      flex: 1;
+      padding: 0.75rem;
+      border-radius: var(--border-radius);
+      background: var(--surface-color);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      font-weight: 500;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    .startButton {
+      background: var(--button-bg-color);
+      color: var(--button-text-color);
+      border: 1px solid var(--button-border-color);
     }
   }
 

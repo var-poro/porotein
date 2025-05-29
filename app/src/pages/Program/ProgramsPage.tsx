@@ -34,71 +34,61 @@ const ProgramsPage: React.FC = () => {
     navigate('/programs/create');
   };
 
-  const handleSetFavoriteProgram = (e: React.MouseEvent, id: string) => {
+  const handleSetFavoriteProgram = (e: React.MouseEvent, programId: string) => {
     e.preventDefault();
-    updateUserMutation.mutate({ activeProgram: id });
+    updateUserMutation.mutate({ activeProgram: programId });
   };
 
   if (isLoadingUser || isLoadingPrograms) {
     return <Loading />;
   }
 
+  const activeProgramId = user?.activeProgram || '';
+
   return (
     <div className={styles.programsPage}>
-      {programs && (
-        <>
-          <div>
-            <div className={styles.activeProgram}>
-              <div
-                className={styles.activeProgramHeader}
-                onClick={handleAddNewProgram}
+      <div className={styles.header}>
+        <h1>Programs</h1>
+        <button 
+          onClick={handleAddNewProgram} 
+          className={styles.addButton}
+          title="Add New Program"
+        >
+          <FaPlus /> Add New Program
+        </button>
+      </div>
+      <div className={styles.programsList}>
+        {programs?.map((program) => (
+          <Link
+            key={program._id}
+            to={`/programs/${program._id}`}
+            className={styles.programCard}
+          >
+            <div className={styles.programHeader}>
+              <h2>{program.name}</h2>
+              <button
+                onClick={(e) => handleSetFavoriteProgram(e, program._id)}
+                className={`${styles.favoriteButton} ${
+                  program._id === activeProgramId ? styles.active : ''
+                }`}
+                title={program._id === activeProgramId ? "Remove from favorites" : "Mark as favorite"}
               >
-                <h2>Mon programme</h2>
-                <FaPlus />
-              </div>
-              {user?.activeProgram && (
-                <div className={styles.programItem}>
-                  <div className={styles.programItemHeader}>
-                    <h3>{(user.activeProgram as Program).name}</h3>
-                    <Link
-                      to={`/programs/edit/${(user.activeProgram as Program)._id}`}
-                    >
-                      <GrEdit />
-                    </Link>
-                  </div>
-                  <span>{(user.activeProgram as Program).description}</span>
-                </div>
-              )}
+                <AiTwotoneStar />
+              </button>
             </div>
-          </div>
-          <div className={styles.otherPrograms}>
-            <h2>Autres programmes</h2>
-            {programs
-              .filter(
-                (program) =>
-                  program._id !== (user?.activeProgram as Program)?._id
-              )
-              .map((program) => (
-                <div key={program._id} className={styles.programItem}>
-                  <div className={styles.programItemHeader}>
-                    <h3>{program.name}</h3>
-                    <Link to={`/programs/edit/${program._id}`}>
-                      <GrEdit />
-                    </Link>
-                  </div>
-                  <p>{program.description}</p>
-                  <button
-                    className={styles.markAsFavorite}
-                    onClick={(e) => handleSetFavoriteProgram(e, program._id)}
-                  >
-                    <span>Marquer comme actif</span>
-                    <AiTwotoneStar />
-                  </button>
-                </div>
-              ))}
-          </div>
-        </>
-      )}
+            <p>{program.description}</p>
+            <div className={styles.programFooter}>
+              <span>{program.sessions.length} sessions</span>
+              <button 
+                className={styles.editButton}
+                title="Edit program"
+              >
+                <GrEdit />
+              </button>
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 };
