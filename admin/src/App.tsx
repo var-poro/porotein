@@ -5,14 +5,12 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import Layout from './components/Layout'
 import { Login } from './pages/Login'
 import Users from './pages/Users'
-import { useTranslation } from './hooks/useTranslation'
 
 function AppRoutes() {
   const { user, loading } = useAuth()
-  const { Trans } = useTranslation()
 
   if (loading) {
-    return <div><Trans>Loading...</Trans></div>
+    return <div>Loading...</div>
   }
 
   if (!user) {
