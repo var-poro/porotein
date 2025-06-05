@@ -19,8 +19,6 @@ import {
 } from 'react-icons/pi';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useTranslation } from '../hooks/useTranslation';
-import { LanguageSelector } from './LanguageSelector';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -34,12 +32,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation();
 
   const isDarkMode = colorScheme === 'dark' || (colorScheme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   const navItems = [
-    { label: t`Users`, path: '/users', icon: PiUsers },
+    { label: 'Users', path: '/users', icon: PiUsers },
   ];
 
   return (
@@ -79,8 +76,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             />
           </Group>
           <Group ml="auto" gap="xs">
-            <LanguageSelector />
-            <Tooltip label={t`Logout`}>
+            <Tooltip label="Logout">
               <ActionIcon
                 variant="default"
                 onClick={logout}
