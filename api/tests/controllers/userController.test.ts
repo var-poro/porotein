@@ -232,7 +232,7 @@ describe('User Controller', () => {
       await userController.getAllUsers(req, res);
 
       // Assertions
-      expect(mockUserFunctions.find).toHaveBeenCalledWith({ isActive: true });
+      expect(mockUserFunctions.find).toHaveBeenCalledWith({ deleted: { $ne: true } });
       expect(res.send).toHaveBeenCalledWith(users);
     });
   });

@@ -6,6 +6,31 @@ let mongoServer: MongoMemoryServer;
 // Augmenter la durée du timeout pour les tests
 jest.setTimeout(30000);
 
+// Mock du service email pour éviter les vraies connexions SMTP dans les tests
+jest.mock('../src/config/email', () => ({
+  transporter: {
+    sendMail: jest.fn().mockResolvedValue({ messageId: 'test-message-id' }),
+    verify: jest.fn().mockImplementation((callback) => {
+      if (callback) callback(null, true);
+    })
+  },
+  getRegistrationEmailTemplate: jest.fn().mockReturnValue({
+    subject: 'Test Registration Email',
+    html: '<p>Test email</p>',
+    text: 'Test email'
+  }),
+  getPasswordResetEmailTemplate: jest.fn().mockReturnValue({
+    subject: 'Test Password Reset Email',
+    html: '<p>Test email</p>',
+    text: 'Test email'
+  }),
+  getMagicLinkEmailTemplate: jest.fn().mockReturnValue({
+    subject: 'Test Magic Link Email',
+    html: '<p>Test email</p>',
+    text: 'Test email'
+  })
+}));
+
 // Connecter à la base de données MongoDB en mémoire avant tous les tests
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();

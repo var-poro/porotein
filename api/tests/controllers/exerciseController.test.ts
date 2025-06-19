@@ -122,11 +122,15 @@ describe('Exercise Controller', () => {
         const repSetData = { repetitions: 10, weight: 50, restTime: 60 };
         
         const mockExercise = {
-          repSets: null, // No repSets initially
-          set: jest.fn(),
+          repSets: null as any, // No repSets initially
+          set: jest.fn().mockImplementation((field, value) => {
+            if (field === 'repSets') {
+              mockExercise.repSets = []; // Initialize as empty array
+              mockExercise.repSets.push = jest.fn(); // Mock push method
+            }
+          }),
           save: jest.fn()
         };
-        // Mock push method will be added after set() is called
         
         Exercise.findById.mockResolvedValue(mockExercise);
 
@@ -139,6 +143,7 @@ describe('Exercise Controller', () => {
         await exerciseController.createRepSet(req, res);
 
         expect(mockExercise.set).toHaveBeenCalledWith('repSets', []);
+        expect(mockExercise.repSets.push).toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(201);
       });
 
