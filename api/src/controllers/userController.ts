@@ -141,7 +141,8 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
 
 export const getAllUsers = async (req: AuthRequest, res: Response) => {
     try {
-        const users = await User.find({ isActive: true });
+        // Récupérer tous les utilisateurs non supprimés
+        const users = await User.find({ deleted: { $ne: true } });
         res.send(users);
     } catch (error) {
         res.status(500).send(error);
