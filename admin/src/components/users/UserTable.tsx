@@ -89,7 +89,7 @@ export const UserTable: React.FC<UserTableProps> = ({
               ))
             ) : (
               <Table.Tr>
-                <Table.Td colSpan={7}>
+                <Table.Td colSpan={8}>
                   <Text ta="center">No users found</Text>
                 </Table.Td>
               </Table.Tr>

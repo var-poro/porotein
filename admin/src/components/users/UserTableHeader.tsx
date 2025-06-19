@@ -54,6 +54,12 @@ export const UserTableHeader: React.FC<UserTableHeaderProps> = ({
             <SortIcon field="createdAt" />
           </Group>
         </Table.Th>
+        <Table.Th style={{ width: 200, cursor: 'pointer' }} onClick={() => onSort('lastLoginAt')}>
+          <Group gap="xs" justify="flex-start">
+            Last Login
+            <SortIcon field="lastLoginAt" />
+          </Group>
+        </Table.Th>
         <Table.Th style={{ width: 120, textAlign: 'right' }}>Actions</Table.Th>
       </Table.Tr>
     </Table.Thead>

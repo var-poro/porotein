@@ -40,7 +40,7 @@ export const UserTableRow: React.FC<UserTableRowProps> = ({
         backgroundColor: isDeleted ? 'var(--mantine-color-red-0)' : 'var(--mantine-color-yellow-0)',
         transition: 'background-color 0.3s ease',
       }}>
-        <Table.Td colSpan={7}>
+        <Table.Td colSpan={8}>
           <Group justify="space-between">
             <Text c={isDeleted ? "red" : "yellow"} fw={500}>
               {isDeleted ? "Utilisateur supprimé" : "Suppression en cours..."}
@@ -109,6 +109,19 @@ export const UserTableRow: React.FC<UserTableRowProps> = ({
             </Text>
           )}
         </Group>
+      </Table.Td>
+      <Table.Td>
+        {user.lastLoginAt ? (
+          <Tooltip label={format(new Date(user.lastLoginAt), 'PPpp')}>
+            <Text size="sm" fw={500}>
+              {formatDistanceToNow(new Date(user.lastLoginAt), { addSuffix: true })}
+            </Text>
+          </Tooltip>
+        ) : (
+          <Text size="sm" c="dimmed">
+            Never
+          </Text>
+        )}
       </Table.Td>
       <Table.Td>
         <UserActionButtons

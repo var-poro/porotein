@@ -37,6 +37,7 @@ interface IUser extends Document {
   lastPasswordResetEmailSent: Date;
   magicLinkToken?: string;
   magicLinkExpires?: Date;
+  lastLoginAt?: Date;
   isActive: boolean;
   deleted?: boolean;
   connectedDevice: IConnectedDevice;
@@ -73,6 +74,10 @@ const userSchema = new Schema<IUser>({
     required: false
   },
   magicLinkExpires: {
+    type: Date,
+    required: false
+  },
+  lastLoginAt: {
     type: Date,
     required: false
   },

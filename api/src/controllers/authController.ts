@@ -128,6 +128,10 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(401).send({ error: 'Invalid email/username or password' });
     }
 
+    // Mettre à jour la date de dernière connexion
+    user.lastLoginAt = new Date();
+    await user.save();
+
     const accessToken = generateAccessToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
 
@@ -296,6 +300,9 @@ export const verifyMagicLink = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Token de magic link invalide ou expiré' });
     }
 
+    // Mettre à jour la date de dernière connexion
+    user.lastLoginAt = new Date();
+    
     // Générer un nouveau token JWT
     const accessToken = generateAccessToken(user._id);
 

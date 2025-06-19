@@ -11,6 +11,7 @@ export interface User {
   activeProgram?: string;
   isActive?: boolean;
   lastLogin?: string;
+  lastLoginAt?: string;
   emailVerified?: boolean;
   lastActivationEmailSent?: string;
   lastPasswordResetEmailSent?: string;
