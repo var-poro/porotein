@@ -101,8 +101,8 @@ export const createSavedRepSet = async (req: AuthRequest, res: Response) => {
     try {
         const savedExercise = await SavedExercise.findById(exerciseId);
 
-        if (!savedExercise) {
-            return res.status(404).send('Exercise not found');
+        if (!savedExercise || !savedExercise.repSets) {
+            return res.status(404).send('Exercise or repSets not found');
         }
 
         const newRepSet = {
@@ -128,8 +128,8 @@ export const getSavedRepSet = async (req: AuthRequest, res: Response) => {
     try {
         const savedExercise = await SavedExercise.findById(exerciseId);
 
-        if (!savedExercise) {
-            return res.status(404).send('Exercise not found');
+        if (!savedExercise || !savedExercise.repSets) {
+            return res.status(404).send('Exercise or repSets not found');
         }
 
         const savedRepSet = savedExercise.repSets.id(repSetId);
@@ -150,8 +150,8 @@ export const updateSavedRepSet = async (req: AuthRequest, res: Response) => {
     try {
         const savedExercise = await SavedExercise.findById(exerciseId);
 
-        if (!savedExercise) {
-            return res.status(404).send('Exercise not found');
+        if (!savedExercise || !savedExercise.repSets) {
+            return res.status(404).send('Exercise or repSets not found');
         }
 
         const savedRepSet = savedExercise.repSets.id(repSetId);
@@ -178,8 +178,8 @@ export const deleteSavedRepSet = async (req: AuthRequest, res: Response) => {
     try {
         const savedExercise = await SavedExercise.findById(exerciseId);
 
-        if (!savedExercise) {
-            return res.status(404).send('Exercise not found');
+        if (!savedExercise || !savedExercise.repSets) {
+            return res.status(404).send('Exercise or repSets not found');
         }
 
         const savedRepSet = savedExercise.repSets.id(repSetId);
@@ -203,11 +203,79 @@ export const getAllSavedRepSets = async (req: AuthRequest, res: Response) => {
     try {
         const savedExercise = await SavedExercise.findById(exerciseId);
 
-        if (!savedExercise) {
-            return res.status(404).send('Exercise not found');
+        if (!savedExercise || !savedExercise.repSets) {
+            return res.status(404).send('Exercise or repSets not found');
         }
 
         res.send(savedExercise.repSets);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+};
+
+// CRUD pour les savedSegments cardio
+export const addSavedCardioSegment = async (req: AuthRequest, res: Response) => {
+    const { exerciseId } = req.params;
+    const segment = req.body;
+    try {
+        const savedExercise = await SavedExercise.findById(exerciseId);
+        if (!savedExercise) {
+            return res.status(404).send('SavedExercise not found');
+        }
+        savedExercise.savedSegments = savedExercise.savedSegments || [];
+        savedExercise.savedSegments.push(segment);
+        await savedExercise.save();
+        res.status(201).send(savedExercise.savedSegments);
+    } catch (error) {
+        res.status(400).send(error);
+    }
+};
+
+export const updateSavedCardioSegment = async (req: AuthRequest, res: Response) => {
+    const { exerciseId, segmentIndex } = req.params;
+    const segment = req.body;
+    try {
+        const savedExercise = await SavedExercise.findById(exerciseId);
+        if (!savedExercise || !savedExercise.savedSegments) {
+            return res.status(404).send('SavedExercise or savedSegments not found');
+        }
+        if (Number(segmentIndex) < 0 || Number(segmentIndex) >= savedExercise.savedSegments.length) {
+            return res.status(404).send('Segment not found');
+        }
+        savedExercise.savedSegments[Number(segmentIndex)] = segment;
+        await savedExercise.save();
+        res.send(savedExercise.savedSegments);
+    } catch (error) {
+        res.status(400).send(error);
+    }
+};
+
+export const deleteSavedCardioSegment = async (req: AuthRequest, res: Response) => {
+    const { exerciseId, segmentIndex } = req.params;
+    try {
+        const savedExercise = await SavedExercise.findById(exerciseId);
+        if (!savedExercise || !savedExercise.savedSegments) {
+            return res.status(404).send('SavedExercise or savedSegments not found');
+        }
+        if (Number(segmentIndex) < 0 || Number(segmentIndex) >= savedExercise.savedSegments.length) {
+            return res.status(404).send('Segment not found');
+        }
+        savedExercise.savedSegments.splice(Number(segmentIndex), 1);
+        await savedExercise.save();
+        res.send(savedExercise.savedSegments);
+    } catch (error) {
+        res.status(400).send(error);
+    }
+};
+
+export const getAllSavedCardioSegments = async (req: AuthRequest, res: Response) => {
+    const { exerciseId } = req.params;
+    try {
+        const savedExercise = await SavedExercise.findById(exerciseId);
+        if (!savedExercise) {
+            return res.status(404).send('SavedExercise not found');
+        }
+        res.send(savedExercise.savedSegments || []);
     } catch (error) {
         res.status(500).send(error);
     }

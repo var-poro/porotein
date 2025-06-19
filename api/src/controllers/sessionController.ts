@@ -8,9 +8,13 @@ interface AuthRequest extends Request {
 
 export const createSession = async (req: AuthRequest, res: Response) => {
   try {
-    const session = new Session({ ...req.body, userId: req.userId });
-    await session.save();
-    res.status(201).send(session);
+    const session = new Session({
+      _id: req.body._id || undefined,
+      ...req.body,
+      userId: req.userId
+    });
+    const savedSession = await session.save();
+    res.status(201).send(savedSession);
   } catch (error) {
     res.status(400).send(error);
   }
@@ -69,23 +73,27 @@ export const getAllSessions = async (req: AuthRequest, res: Response) => {
 
 export const createExerciseInSession = async (req: AuthRequest, res: Response) => {
   try {
-    const { id: sessionId } = req.params;
-    const exercise = new Exercise(req.body);
-    await exercise.save();
+    const { id: sessionId, exerciseId } = req.params;
+    
+    // First check if exercise exists
+    const exercise = await Exercise.findById(exerciseId);
+    if (!exercise) {
+      return res.status(404).send('Exercise not found');
+    }
 
     const session = await Session.findByIdAndUpdate(
       sessionId,
-      { $push: { exercises: exercise._id } },
-      { new: true, runValidators: true },
+      { $addToSet: { exercises: exerciseId } },
+      { new: true }
     );
 
     if (!session) {
       return res.status(404).send('Session not found');
     }
 
-    res.status(201).send(exercise);
+    res.send(session);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(500).send(error);
   }
 };
 
@@ -115,7 +123,7 @@ export const deleteExerciseFromSession = async (req: AuthRequest, res: Response)
     const session = await Session.findByIdAndUpdate(
       sessionId,
       { $pull: { exercises: exerciseId } },
-      { new: true, runValidators: true },
+      { new: true }
     );
 
     if (!session) {

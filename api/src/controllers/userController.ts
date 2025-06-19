@@ -141,7 +141,7 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
 
 export const getAllUsers = async (req: AuthRequest, res: Response) => {
     try {
-        const users = await User.find({ deleted: { $ne: true } }, '-password');
+        const users = await User.find({ isActive: true });
         res.send(users);
     } catch (error) {
         res.status(500).send(error);
@@ -150,7 +150,7 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
 
 export const getUserById = async (req: AuthRequest, res: Response) => {
     try {
-        const user = await User.findById(req.params.id, '-password');
+        const user = await User.findById(req.params.id);
         if (!user) {
             return res.status(404).send();
         }
@@ -344,18 +344,25 @@ export const resetPassword = async (req: AuthRequest, res: Response) => {
 
 export const toggleUserStatus = async (req: AuthRequest, res: Response) => {
   try {
-    const { isActive } = req.body;
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { isActive },
-      { new: true }
-    );
-
+    // Get current user to toggle the status
+    const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }
+    
+    // Update user status
+    const updatedUser = {
+      _id: user._id,
+      isActive: !user.isActive
+    };
+    
+    await User.findByIdAndUpdate(
+      req.params.id,
+      { isActive: !user.isActive },
+      { new: true }
+    );
 
-    res.json(user);
+    res.send(updatedUser);
   } catch (error) {
     console.error('Erreur lors de la mise à jour du statut:', error);
     res.status(500).json({ message: 'Erreur lors de la mise à jour du statut' });
@@ -366,7 +373,7 @@ export const restoreUser = async (req: AuthRequest, res: Response) => {
     try {
         const user = await User.findByIdAndUpdate(
             req.params.id,
-            { deleted: false, isActive: true },
+            { deleted: false },
             { new: true }
         );
         if (!user) {

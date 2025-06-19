@@ -3,6 +3,36 @@ import { ISavedExercise, savedExerciseSchema } from './SavedExercise';
 import Session from './Session';
 import Exercise from './Exercise';
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     SavedSession:
+ *       type: object
+ *       required:
+ *         - userId
+ *         - programId
+ *         - savedExercises
+ *         - duration
+ *         - performedAt
+ *       properties:
+ *         userId:
+ *           type: string
+ *         sessionId:
+ *           type: string
+ *         programId:
+ *           type: string
+ *         savedExercises:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/SavedExercise'
+ *         duration:
+ *           type: number
+ *         performedAt:
+ *           type: string
+ *           format: date-time
+ */
+
 interface ISavedSession extends Document {
   _id: Types.ObjectId;
   userId: Types.ObjectId;
@@ -63,20 +93,22 @@ savedSessionSchema.post('save', async function (doc) {
       
       if (savedExercise) {
         console.log(`Updating exercise ${exercise._id}`);
-        console.log('New repSets:', savedExercise.repSets);
-        
-        await Exercise.findByIdAndUpdate(
-          exercise._id,
-          {
-            $set: {
-              repSets: savedExercise.repSets.map((rs: { repetitions: number; weight: number; restTime: number }) => ({
-                repetitions: Number(rs.repetitions),
-                weight: Number(rs.weight),
-                restTime: Number(rs.restTime)
-              }))
+        if (savedExercise.repSets && savedExercise.repSets.length > 0) {
+          console.log('New repSets:', savedExercise.repSets);
+          
+          await Exercise.findByIdAndUpdate(
+            exercise._id,
+            {
+              $set: {
+                repSets: savedExercise.repSets.map((rs: { repetitions: number; weight: number; restTime: number }) => ({
+                  repetitions: Number(rs.repetitions),
+                  weight: Number(rs.weight),
+                  restTime: Number(rs.restTime)
+                }))
+              }
             }
-          }
-        );
+          );
+        }
       }
     }
 

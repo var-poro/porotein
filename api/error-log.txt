@@ -1,0 +1,4 @@
+
+> api@1.0.0 test /Users/poro/WebstormProjects/git/porotein/api
+> jest "tests/routes/exerciseRoutes.test.ts"
+

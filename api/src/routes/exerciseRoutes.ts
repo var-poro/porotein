@@ -10,6 +10,10 @@ import {
   getRepSet,
   updateExercise,
   updateRepSet,
+  addCardioSegment,
+  updateCardioSegment,
+  deleteCardioSegment,
+  getAllCardioSegments,
 } from '../controllers/exerciseController';
 import { auth } from '../middleware/auth';
 
@@ -396,5 +400,160 @@ router.delete('/:exerciseId/reps/:repSetId', auth, deleteRepSet);
  *         description: Exercice non trouvé
  */
 router.get('/:exerciseId/reps', auth, getAllRepSets);
+
+/**
+ * @swagger
+ * tags:
+ *   name: Segments Cardio
+ *   description: Gestion des segments cardio pour les exercices
+ */
+
+/**
+ * @swagger
+ * /exercises/{exerciseId}/segments:
+ *   post:
+ *     summary: Ajouter un segment cardio à un exercice
+ *     tags: [Segments Cardio]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: exerciseId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de l'exercice
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Nom du segment cardio
+ *               duration:
+ *                 type: number
+ *                 description: Durée du segment en minutes
+ *               intensity:
+ *                 type: number
+ *                 description: Intensité du segment (0-100)
+ *     responses:
+ *       201:
+ *         description: Segment cardio ajouté avec succès
+ *       400:
+ *         description: Données invalides
+ *       401:
+ *         description: Non authentifié
+ *       404:
+ *         description: Exercice non trouvé
+ */
+router.post('/:exerciseId/segments', auth, addCardioSegment);
+
+/**
+ * @swagger
+ * /exercises/{exerciseId}/segments/{segmentIndex}:
+ *   put:
+ *     summary: Mettre à jour un segment cardio
+ *     tags: [Segments Cardio]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: exerciseId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de l'exercice
+ *       - in: path
+ *         name: segmentIndex
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Index du segment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Nom du segment cardio
+ *               duration:
+ *                 type: number
+ *                 description: Durée du segment en minutes
+ *               intensity:
+ *                 type: number
+ *                 description: Intensité du segment (0-100)
+ *     responses:
+ *       200:
+ *         description: Segment cardio mis à jour avec succès
+ *       400:
+ *         description: Données invalides
+ *       401:
+ *         description: Non authentifié
+ *       404:
+ *         description: Exercice ou segment non trouvé
+ */
+router.put('/:exerciseId/segments/:segmentIndex', auth, updateCardioSegment);
+
+/**
+ * @swagger
+ * /exercises/{exerciseId}/segments/{segmentIndex}:
+ *   delete:
+ *     summary: Supprimer un segment cardio
+ *     tags: [Segments Cardio]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: exerciseId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de l'exercice
+ *       - in: path
+ *         name: segmentIndex
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Index du segment
+ *     responses:
+ *       200:
+ *         description: Segment cardio supprimé avec succès
+ *       401:
+ *         description: Non authentifié
+ *       404:
+ *         description: Exercice ou segment non trouvé
+ */
+router.delete('/:exerciseId/segments/:segmentIndex', auth, deleteCardioSegment);
+
+/**
+ * @swagger
+ * /exercises/{exerciseId}/segments:
+ *   get:
+ *     summary: Obtenir tous les segments cardio d'un exercice
+ *     tags: [Segments Cardio]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: exerciseId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de l'exercice
+ *     responses:
+ *       200:
+ *         description: Liste des segments cardio récupérée avec succès
+ *       401:
+ *         description: Non authentifié
+ *       404:
+ *         description: Exercice non trouvé
+ */
+router.get('/:exerciseId/segments', auth, getAllCardioSegments);
 
 export default router;

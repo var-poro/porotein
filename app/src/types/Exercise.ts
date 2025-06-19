@@ -1,3 +1,21 @@
+export type ExerciseType = 'strength' | 'cardio';
+
+export interface CardioSegment {
+  name?: string;
+  distance?: number;
+  distanceUnit?: 'm' | 'km';
+  duration?: number;
+  durationUnit?: 's' | 'min';
+  pace?: number;
+  paceUnit?: 'min/km' | 'km/h';
+  calories?: number;
+  avgHeartRate?: number;
+  intensity?: number;
+  heartRateZone?: number;
+  notes?: string;
+  order?: number;
+}
+
 export interface Exercise {
   _id?: string;
   name: string;
@@ -9,7 +27,9 @@ export interface Exercise {
   duration: number;
   createdAt: Date;
   updatedAt: Date;
-  repSets: RepSet[];
+  type: ExerciseType;
+  repSets?: RepSet[];
+  segments?: CardioSegment[];
 }
 
 export interface RepSet {

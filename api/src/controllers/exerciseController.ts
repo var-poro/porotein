@@ -23,7 +23,7 @@ export const getExercise = async (req: AuthRequest, res: Response) => {
     if (fullTagDetails) {
       exercise = await Exercise.findById(req.params.id).populate('tags').populate('targetMuscles');
     } else {
-      exercise = await Exercise.findById(req.params.id).select('name description videoUrl difficulty repSets tags targetMuscles createdAt updatedAt');
+      exercise = await Exercise.findById(req.params.id).select('name description videoUrl difficulty repSets segments type tags targetMuscles createdAt updatedAt');
     }
 
     if (!exercise) {
@@ -88,7 +88,11 @@ export const createRepSet = async (req: AuthRequest, res: Response) => {
       restTime,
     };
 
-    exercise.repSets.push(newRepSet);
+    if (!exercise.repSets) {
+      exercise.set('repSets', []);
+    }
+    
+    exercise.repSets!.push(newRepSet);
     await exercise.save();
 
     res.status(201).send(newRepSet);
@@ -103,8 +107,8 @@ export const getRepSet = async (req: AuthRequest, res: Response) => {
   try {
     const exercise = await Exercise.findById(exerciseId);
 
-    if (!exercise) {
-      return res.status(404).send('Exercise not found');
+    if (!exercise || !exercise.repSets) {
+      return res.status(404).send('Exercise or repSets not found');
     }
 
     const repSet = exercise.repSets.id(repSetId);
@@ -125,8 +129,8 @@ export const updateRepSet = async (req: AuthRequest, res: Response) => {
   try {
     const exercise = await Exercise.findById(exerciseId);
 
-    if (!exercise) {
-      return res.status(404).send('Exercise not found');
+    if (!exercise || !exercise.repSets) {
+      return res.status(404).send('Exercise or repSets not found');
     }
 
     const repSet = exercise.repSets.id(repSetId);
@@ -152,8 +156,8 @@ export const deleteRepSet = async (req: AuthRequest, res: Response) => {
   try {
     const exercise = await Exercise.findById(exerciseId);
 
-    if (!exercise) {
-      return res.status(404).send('Exercise not found');
+    if (!exercise || !exercise.repSets) {
+      return res.status(404).send('Exercise or repSets not found');
     }
 
     const repSet = exercise.repSets.id(repSetId);
@@ -177,11 +181,79 @@ export const getAllRepSets = async (req: AuthRequest, res: Response) => {
   try {
     const exercise = await Exercise.findById(exerciseId);
 
-    if (!exercise) {
-      return res.status(404).send('Exercise not found');
+    if (!exercise || !exercise.repSets) {
+      return res.status(404).send('Exercise or repSets not found');
     }
 
     res.send(exercise.repSets);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
+// CRUD pour les segments cardio
+export const addCardioSegment = async (req: AuthRequest, res: Response) => {
+  const { exerciseId } = req.params;
+  const segment = req.body;
+  try {
+    const exercise = await Exercise.findById(exerciseId);
+    if (!exercise) {
+      return res.status(404).send('Exercise not found');
+    }
+    exercise.segments = exercise.segments || [];
+    exercise.segments.push(segment);
+    await exercise.save();
+    res.status(201).send(exercise.segments);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+};
+
+export const updateCardioSegment = async (req: AuthRequest, res: Response) => {
+  const { exerciseId, segmentIndex } = req.params;
+  const segment = req.body;
+  try {
+    const exercise = await Exercise.findById(exerciseId);
+    if (!exercise || !exercise.segments) {
+      return res.status(404).send('Exercise or segments not found');
+    }
+    if (Number(segmentIndex) < 0 || Number(segmentIndex) >= exercise.segments.length) {
+      return res.status(404).send('Segment not found');
+    }
+    exercise.segments[Number(segmentIndex)] = segment;
+    await exercise.save();
+    res.send(exercise.segments);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+};
+
+export const deleteCardioSegment = async (req: AuthRequest, res: Response) => {
+  const { exerciseId, segmentIndex } = req.params;
+  try {
+    const exercise = await Exercise.findById(exerciseId);
+    if (!exercise || !exercise.segments) {
+      return res.status(404).send('Exercise or segments not found');
+    }
+    if (Number(segmentIndex) < 0 || Number(segmentIndex) >= exercise.segments.length) {
+      return res.status(404).send('Segment not found');
+    }
+    exercise.segments.splice(Number(segmentIndex), 1);
+    await exercise.save();
+    res.send(exercise.segments);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+};
+
+export const getAllCardioSegments = async (req: AuthRequest, res: Response) => {
+  const { exerciseId } = req.params;
+  try {
+    const exercise = await Exercise.findById(exerciseId);
+    if (!exercise) {
+      return res.status(404).send('Exercise not found');
+    }
+    res.send(exercise.segments || []);
   } catch (error) {
     res.status(500).send(error);
   }

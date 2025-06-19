@@ -1,12 +1,12 @@
 import { Session } from '@/types/Session.ts';
-import { Exercise, RepSet } from './Exercise';
+import { Exercise, RepSet, CardioSegment } from './Exercise';
 
 export interface SavedSession extends Session {
   performedAt: string;
   duration: number;
   sessionId: string;
   session: Session;
-  savedExercises: SavedExercise[]
+  savedExercises: SavedExercise[];
 }
 
 export interface SavedExercise extends Exercise {
@@ -16,10 +16,16 @@ export interface SavedExercise extends Exercise {
     id: string;
   };
   exercise: Exercise;
-  savedRepSets: SavedRepSet[]
+  savedRepSets?: SavedRepSet[];
+  savedSegments?: SavedCardioSegment[];
 }
 
 export interface SavedRepSet extends RepSet {
   repSetId: string;
   repSet: RepSet;
+}
+
+export interface SavedCardioSegment extends CardioSegment {
+  segmentId: string;
+  segment: CardioSegment;
 }
