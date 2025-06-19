@@ -115,10 +115,10 @@ const Recapitulatif = () => {
       console.log('Exercise repSets:', JSON.stringify(exercise.repSets, null, 2));
       
       // Calculer les moyennes en s'assurant que les valeurs sont des nombres
-      const avgReps = exercise.repSets?.reduce((sum, set) => 
-        sum + (Number(set.repetitions) || 0), 0) / (exercise.repSets?.length || 1);
-      const avgWeight = exercise.repSets?.reduce((sum, set) => 
-        sum + (Number(set.weight) || 0), 0) / (exercise.repSets?.length || 1);
+      const avgReps = (exercise.repSets?.reduce((sum, set) => 
+        sum + (Number(set.repetitions) || 0), 0) || 0) / (exercise.repSets?.length || 1);
+      const avgWeight = (exercise.repSets?.reduce((sum, set) => 
+        sum + (Number(set.weight) || 0), 0) || 0) / (exercise.repSets?.length || 1);
       
       const result = {
         date: new Date(savedSession.performedAt).toLocaleDateString(),
@@ -147,14 +147,18 @@ const Recapitulatif = () => {
     const previousSession = historicalSessions[1];
     const currentSession = savedSessionData;
   
-    const totalVolume = (session: SavedSession) => 
-      session.savedExercises?.reduce((acc, ex) => 
-        acc + ex.repSets?.reduce((setAcc: number, set: { weight: number; repetitions: number }) => 
-          setAcc + (set.weight * set.repetitions), 0), 0);
+    const totalVolume = (session: SavedSession | null | undefined) => {
+      if (!session?.savedExercises) return 0;
+      return session.savedExercises.reduce((acc, ex) => 
+        acc + (ex.repSets?.reduce((setAcc: number, set: { weight: number; repetitions: number }) => 
+          setAcc + (set.weight * set.repetitions), 0) || 0), 0);
+    };
   
     const currentVolume = totalVolume(currentSession);
     const previousVolume = totalVolume(previousSession);
-    const volumeChange = ((currentVolume - previousVolume) / previousVolume) * 100;
+    const volumeChange = previousVolume > 0 
+      ? ((currentVolume - previousVolume) / previousVolume) * 100 
+      : 0;
   
     return {
       volumeChange: Math.round(volumeChange * 10) / 10,
@@ -209,18 +213,18 @@ const Recapitulatif = () => {
       <TileContainer>
         <Tile
           title="Exercices"
-          value={savedSessionData?.savedExercises?.length}
+          value={savedSessionData?.savedExercises?.length || 0}
           icon="performance"
         />
         <Tile
           title="Séries totales"
           value={savedSessionData?.savedExercises?.reduce((acc: number, ex: SavedExercise) => 
-            acc + (ex.repSets?.length || 0), 0)}
+            acc + (ex.repSets?.length || 0), 0) || 0}
           icon="stats"
         />
         <Tile
           title="Durée totale"
-          value={formatDuration(savedSessionData?.duration)}
+          value={formatDuration(savedSessionData?.duration || 0)}
           icon="time"
         />
       </TileContainer>
@@ -255,7 +259,7 @@ const Recapitulatif = () => {
           // Get the exercise ID, handling both frontend and backend data structures
           const exerciseId = typeof exercise.exerciseId === 'object' 
             ? exercise.exerciseId?._id || exercise.exerciseId?.id 
-            : exercise.exerciseId;
+            : exercise.exerciseId || exercise._id;
             
           if (!exerciseId) {
             console.warn('Exercise missing ID:', exercise);

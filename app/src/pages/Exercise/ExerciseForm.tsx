@@ -119,7 +119,8 @@ const ExerciseForm = () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       repSets,
-      duration: 0
+      duration: 0,
+      type: 'strength' // Ajout de la propriété type requise
     };
 
     if (isEditMode) {

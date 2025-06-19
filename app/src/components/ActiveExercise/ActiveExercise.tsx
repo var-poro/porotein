@@ -111,7 +111,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
                 repSetId: `${exercise._id}_${index}`,
                 repetitions: Number(repSet.repetitions) || 0,
                 weight: Number(repSet.weight) || 0,
-                restTime: repSet.restTime !== undefined ? Number(repSet.restTime) : exercise.repSets[index].restTime,
+                restTime: repSet.restTime !== undefined ? Number(repSet.restTime) : (exercise.repSets?.[index]?.restTime || 0),
                 duration: repSet.duration || 0,
               })),
             }
@@ -149,7 +149,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
             ...newRepSets[nextIndex],
             repetitions: newRepSets[nextIndex].repetitions || 0,
             weight: newRepSets[nextIndex].weight || 0,
-            restTime: newRepSets[nextIndex].restTime || exercise.repSets[nextIndex].restTime
+            restTime: newRepSets[nextIndex].restTime || (exercise.repSets?.[nextIndex]?.restTime || 0)
           };
           return newRepSets;
         });
@@ -175,7 +175,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
             ...newRepSets[prevIndex],
             repetitions: newRepSets[prevIndex].repetitions || 0,
             weight: newRepSets[prevIndex].weight || 0,
-            restTime: newRepSets[prevIndex].restTime || exercise.repSets[prevIndex].restTime
+            restTime: newRepSets[prevIndex].restTime || (exercise.repSets?.[prevIndex]?.restTime || 0)
           };
           return newRepSets;
         });
@@ -185,7 +185,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
   };
 
   const handleTimerComplete = () => {
-    if (currentSeriesIndex + 1 === exercise.repSets.length) {
+    if (currentSeriesIndex + 1 === (exercise.repSets?.length || 0)) {
       // Si c'est la dernière série, on passe directement à l'exercice suivant
       nextExercise();
     } else {
@@ -194,7 +194,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
   };
 
   const handleManualNext = () => {
-    if (currentSeriesIndex + 1 === exercise.repSets.length) {
+    if (currentSeriesIndex + 1 === (exercise.repSets?.length || 0)) {
       // Si c'est la dernière série, on passe directement à l'exercice suivant
       nextExercise();
     } else {
@@ -250,12 +250,12 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
     const savedRepSets = localStorage.getItem(`repSets_${exercise._id}`);
     if (!savedRepSets) {
       // Si pas de données sauvegardées, on utilise les valeurs par défaut
-      setRepSets(exercise.repSets);
+      setRepSets(exercise.repSets || []);
     } else {
       try {
         // Si des données existent, on s'assure qu'elles ont la bonne structure
         const parsedRepSets = JSON.parse(savedRepSets);
-        const updatedRepSets = exercise.repSets.map((defaultRepSet, index) => ({
+        const updatedRepSets = (exercise.repSets || []).map((defaultRepSet, index) => ({
           ...defaultRepSet,
           ...(parsedRepSets[index] || {}),
           repetitions: parsedRepSets[index]?.repetitions || 0,
@@ -266,7 +266,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
       } catch (error) {
         // En cas d'erreur de parsing, on utilise les valeurs par défaut
         console.error(`Erreur lors du parsing des repSets pour l'exercice ${exercise._id}:`, error);
-        setRepSets(exercise.repSets);
+        setRepSets(exercise.repSets || []);
       }
     }
   }, [exercise._id]);
@@ -370,10 +370,10 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
         <>
           <div className={styles.header}>
             <h4>Série {currentSeriesIndex + 1}</h4>
-            <small>/ {exercise.repSets.length}</small>
+            <small>/ {exercise.repSets?.length || 0}</small>
           </div>
           {repSetIsDone && 
-           currentSeriesIndex + 1 < exercise.repSets.length && 
+           currentSeriesIndex + 1 < (exercise.repSets?.length || 0) && 
            repSets[currentSeriesIndex]?.weight !== repSets[currentSeriesIndex + 1]?.weight && 
            repSets[currentSeriesIndex + 1]?.weight !== undefined && (
             <div className={styles.weightChange}>
@@ -413,8 +413,8 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
               ) : (
                 <Timer
                   key={`timer-${currentSeriesIndex}`}
-                  seconds={repSets[currentSeriesIndex]?.restTime || exercise.repSets[currentSeriesIndex].restTime}
-                  defaultValue={exercise.repSets[currentSeriesIndex].restTime}
+                  seconds={repSets[currentSeriesIndex]?.restTime || (exercise.repSets?.[currentSeriesIndex]?.restTime || 0)}
+                  defaultValue={exercise.repSets?.[currentSeriesIndex]?.restTime || 0}
                   onComplete={handleTimerComplete}
                   onCountdownStart={startCountdown}
                   onTimeChange={(newSeconds, isRunning) => {
@@ -438,7 +438,7 @@ const ActiveExercise: FC<Props> = ({ exercise, nextExercise, previousExercise, h
               {(currentSeriesIndex > 0 || repSetIsDone) && (
                 <button onClick={handlePreviousRepSet}>Précédent</button>
               )}
-              {currentSeriesIndex + 1 !== exercise.repSets.length || !repSetIsDone ? (
+              {currentSeriesIndex + 1 !== (exercise.repSets?.length || 0) || !repSetIsDone ? (
                 <button onClick={handleNextRepSet}>
                   Suivant 
                   {countdown !== null && `(${countdown})`}

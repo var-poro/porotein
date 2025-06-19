@@ -46,12 +46,12 @@ const SessionExercises = ({ exercises }: { exercises: SavedExercise[] }) => {
           </div>
           {savedExercise._id && expandedExercises.includes(savedExercise._id) && (
             <ul className={classes.repSets}>
-              {savedExercise.savedRepSets.map((savedRepSet: SavedRepSet) => (
+              {savedExercise.savedRepSets?.map((savedRepSet: SavedRepSet) => (
                 <li key={savedRepSet._id} className={classes.repSet}>
                   <FaDumbbell />
                   {savedRepSet.repetitions} × {savedRepSet.weight}kg
                 </li>
-              ))}
+              )) || <li className={classes.noRepSets}>Aucune série enregistrée</li>}
             </ul>
           )}
         </li>

@@ -24,13 +24,13 @@ export const createSavedSession = async (req: AuthRequest, res: Response) => {
         exerciseId: exercise.exerciseId || exercise._id,
         name: exercise.name,
         duration: exercise.duration,
-        repSets: exercise.repSets.map((repSet) => ({
+        repSets: exercise.repSets?.map((repSet) => ({
           repSetId: new Types.ObjectId(),
           repetitions: repSet.repetitions,
           weight: repSet.weight,
           restTime: repSet.restTime,
           duration: repSet.duration
-        }))
+        })) || []
       }))
     });
 

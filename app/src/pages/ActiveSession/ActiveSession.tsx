@@ -167,7 +167,7 @@ const ActiveSession = () => {
         duration: index === exerciseIndex && exerciseStartTime
           ? currentTime - exerciseStartTime
           : exercise.duration || 0,
-        repSets: exercise.repSets.map((repSet: RepSet) => ({
+        repSets: exercise.repSets?.map((repSet: RepSet) => ({
           ...repSet,
           _id: repSet._id,
           duration: repSet.duration || 0,
